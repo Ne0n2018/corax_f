@@ -1,6 +1,10 @@
 export interface SubCategory {
-    id: string;
-    name: string;
+    id: string | undefined;
+    name: string | undefined;
+}
+
+interface subCategoryWithOutId {
+    name: string | undefined;
 }
 
 export interface Category {
@@ -13,5 +17,5 @@ export interface Category {
 
 export interface CategoryCreate {
    name: string;
-   subCategory: SubCategory[];
+   subCategory: subCategoryWithOutId[] | undefined;
 }

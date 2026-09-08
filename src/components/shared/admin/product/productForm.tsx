@@ -12,7 +12,6 @@ import {Controller, SubmitHandler, useFieldArray, useForm, useWatch} from "react
 import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {productSchema} from "@/schemas/product.create.schema";
-
 import Image from "next/image";
 import {X} from "lucide-react";
 import {DynamicFieldArray} from "@/components/shared/admin/product/dynamicFieldArray";
@@ -21,7 +20,8 @@ import {ImagePreview} from "@/components/shared/admin/product/imagePreview";
 import {SelectWithSearch} from "@/components/ui/selectWithSearch";
 import {cn} from "@/lib/utils";
 
-type ProductFormValues = z.infer<typeof productSchema>;
+type ProductFormValues = z.input<typeof productSchema>;
+type ProductFormOutput = z.output<typeof productSchema>;
 
 interface ProductFormProps {
     productId?: string;
@@ -49,7 +49,7 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
         setValue,
         reset,
         formState: { errors },
-    } = useForm<ProductFormValues>({
+    } = useForm<ProductFormValues, any, ProductFormOutput>({
         resolver: zodResolver(productSchema),
         defaultValues: {
             image: undefined,
@@ -103,10 +103,11 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
             });
 
             if (initialData.imageUrl) {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setExistingImageUrl(initialData.imageUrl);
             }
         }
-    }, [initialData, reset]);;
+    }, [initialData, reset]);
 
     useEffect(() => {
         getForSelect();
@@ -139,12 +140,9 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
         }
     };
 
-    const onError = (error) => {
-        console.log(error);
-    }
-
+    
     return (
-        <form onSubmit={handleSubmit(onSubmit, onError)} className={cn("flex flex-col gap-6 w-full", className)}>
+        <form onSubmit={handleSubmit(onSubmit)} className={cn("flex flex-col gap-6 w-full", className)}>
             {/* Превью фото: Новое выложенное (File) ИЛИ Старое с бэка (URL) */}
             {watchedImage instanceof File ? (
                 <ImagePreview

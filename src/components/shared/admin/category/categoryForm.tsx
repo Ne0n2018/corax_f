@@ -8,7 +8,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {X} from "lucide-react";
 import {useCategoryStore} from "@/store/category.store";
-import {CategoryFormValues, categorySchema} from "@/schemas/category.create.schema";
+import {CategoryFormOutput, CategoryFormValues, categorySchema} from "@/schemas/category.create.schema";
 import {cn} from "@/lib/utils";
 
 interface CategoryFormProps {
@@ -34,7 +34,7 @@ export function CategoryForm({ id, className }: CategoryFormProps) {
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<CategoryFormValues>({
+    } = useForm<CategoryFormValues, any, CategoryFormOutput>({
         resolver: zodResolver(categorySchema),
         defaultValues: {
             name: "",
@@ -74,12 +74,13 @@ export function CategoryForm({ id, className }: CategoryFormProps) {
     }, [id, categories, getCategoriesById, reset]);
 
     const onSubmit: SubmitHandler<CategoryFormValues> = async (data) => {
+       
         const cleanedData = {
             ...data,
             subCategories: data.subCategory.filter((sub) => sub.name.trim() !== ""),
         };
 
-        let isSuccess = false;
+        let isSuccess
 
         if (isEditMode && id) {
             isSuccess = await adminUpdate(id, cleanedData);

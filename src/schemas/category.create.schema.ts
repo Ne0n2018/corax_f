@@ -11,4 +11,6 @@ export const categorySchema = z.object({
     ).optional().default([]),
 });
 
-export type CategoryFormValues = z.infer<typeof categorySchema>;
+export type CategoryFormValues = z.input<typeof categorySchema>;
+
+export type CategoryFormOutput = z.output<typeof categorySchema>;

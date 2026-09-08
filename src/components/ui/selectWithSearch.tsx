@@ -10,8 +10,8 @@ interface Option {
 }
 
 interface SelectWithSearchProps {
-    options: Option[];
-    value: string;
+    options: Option[] | undefined;
+    value?: string;
     onChange: (value: string) => void;
     placeholder: string;
     error?: string;
@@ -31,10 +31,10 @@ export const SelectWithSearch = ({
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Находим выбранный элемент для отображения
-    const selectedOption = options.find((opt) => opt.id === value);
+    const selectedOption = options?.find((opt) => opt.id === value);
 
     // Фильтрация вариантов по поисковому запросу
-    const filteredOptions = options.filter((opt) =>
+    const filteredOptions = options?.filter((opt) =>
         opt.name.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -92,8 +92,9 @@ export const SelectWithSearch = ({
                     <div className="overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
                         {isLoading ? (
                             <div className="text-white/50 text-xs p-2 text-center">Загрузка...</div>
-                        ) : filteredOptions.length > 0 ? (
-                            filteredOptions.map((opt) => (
+                                
+                        ) : filteredOptions?.length > 0 ? (
+                            filteredOptions?.map((opt) => (
                                 <button
                                     key={opt.id}
                                     type="button"
