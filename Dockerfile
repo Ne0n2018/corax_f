@@ -5,7 +5,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Устанавливаем pnpm напрямую через npm, чтобы избежать сбоев Corepack
-RUN npm install -g pnpm@latest
+RUN npm install -g pnpm@9
 
 COPY package.json pnpm-lock.yaml* ./
 # Если lockfile отсутствует или отличается от package.json, используем обычную установку
