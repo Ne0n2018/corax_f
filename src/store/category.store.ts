@@ -12,7 +12,7 @@ interface CategoryStore {
 
     getForSelect: () => Promise<void>;
     fetchCategories: (name?: string) => Promise<void>;
-    adminCreate: (data: CategoryCreate) => Promise<boolean>;
+    adminCreate: (data?: CategoryCreate) => Promise<boolean>;
     adminUpdate: (id: string, data: any) => Promise<boolean>;
     getCategoriesById: (id: string) => Promise<void>;
     deleteCategory: (id: string) => Promise<boolean>;
@@ -55,7 +55,7 @@ export const useCategoryStore = create<CategoryStore>((set) => ({
         }
     },
 
-    adminCreate: async (data: CategoryCreate) => {
+    adminCreate: async (data?: CategoryCreate) => {
         set({ isLoading: true, error: null });
 
         try {

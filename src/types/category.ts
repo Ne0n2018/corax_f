@@ -17,5 +17,5 @@ export interface Category {
 
 export interface CategoryCreate {
    name: string;
-   subCategory: subCategoryWithOutId[] | undefined;
+   subCategory?: subCategoryWithOutId[];
 }
