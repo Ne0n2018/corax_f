@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+import type {NextConfig} from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+        new URL('https://s3-minsk.cloud.mts.by:443/**')
+    ],
+  },
+  output: "standalone",
   reactCompiler: true,
 };
 
