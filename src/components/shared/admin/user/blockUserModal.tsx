@@ -7,7 +7,7 @@ import {X} from "lucide-react";
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onConfirm: (reason: string) => Promise<void>;
+    onConfirm: (reason: string) => Promise<boolean>;
     userName: string;
 }
 

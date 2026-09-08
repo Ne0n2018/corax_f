@@ -1,7 +1,7 @@
 'use client'
 
 import {useState} from "react";
-import {Roles, User} from "@/types/user";
+import {Roles, UserAdmin} from "@/types/user";
 import {Button} from "@/components/ui/button";
 
 import {useUserStore} from "@/store/user.store";
@@ -10,7 +10,7 @@ import {UserRoleSelect} from "@/components/shared/admin/user/userRoleSelect";
 import {BlockUserModal} from "@/components/shared/admin/user/blockUserModal";
 
 interface Props {
-    user: User;
+    user: UserAdmin | null;
 }
 
 export function UserItem({ user }: Props) {

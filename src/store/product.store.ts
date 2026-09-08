@@ -1,6 +1,6 @@
 import {create} from "zustand";
 import {api} from "@/lib/api";
-import {AdminProduct, CreateProductDto, ProductsApiResponse,} from "@/types/products";
+import {AdminProduct, ProductsApiResponse,} from "@/types/products";
 import {toast} from "sonner";
 
 interface ProductStoreProps {
@@ -12,9 +12,9 @@ interface ProductStoreProps {
     nextCursor: string | null;
 
     adminGet: (name?: string, loadMore?: boolean) => Promise<void>;
-    adminCreate: (data: CreateProductDto) => Promise<boolean>;
+    adminCreate: (data: any) => Promise<boolean>;
     adminGetById: (id: string) => Promise<void>;
-    adminUpdate: (id: string, data: CreateProductDto) => Promise<boolean>;
+    adminUpdate: (id: string, data: any) => Promise<boolean>;
     adminDelete: (id: string) => Promise<boolean>;
 }
 
@@ -62,7 +62,7 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
         }
     },
 
-    adminCreate: async (data: CreateProductDto) => {
+    adminCreate: async (data: any) => {
         set({ isLoading: true, error: null });
         try {
             const formData = new FormData();
@@ -116,7 +116,7 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
         }
     },
 
-    adminUpdate: async (id: string, data: CreateProductDto) => {
+    adminUpdate: async (id: string, data: any) => {
         set({ isLoading: true, error: null });
         try {
             const formData = new FormData();
