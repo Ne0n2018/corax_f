@@ -18,7 +18,8 @@ import {useEffect} from "react";
 import {SelectWithSearch} from "@/components/ui/selectWithSearch";
 import {useProviderStore} from "@/store/provider.store";
 
-type ProductFormValues = z.infer<typeof productSchema>;
+type ProductFormValues = z.input<typeof productSchema>;
+type ProductFormOutput = z.output<typeof productSchema>;
 
 interface ProductCreateProps {
     className?: string;
@@ -38,7 +39,7 @@ export function ProductCreate({className}: ProductCreateProps) {
         setValue,
         reset,
         formState: { errors },
-    } = useForm<ProductFormValues>({
+    } = useForm<ProductFormValues, any, ProductFormOutput>({
         resolver: zodResolver(productSchema),
         defaultValues: {
             image: undefined,
