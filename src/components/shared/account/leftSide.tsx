@@ -6,7 +6,7 @@ import {cn} from "@/lib/utils";
 import {User} from "@/types/user";
 
 interface leftSideProps {
-    user: User
+    user: User | null
     isLoading: boolean;
     logOut: () => void;
     className?: string;

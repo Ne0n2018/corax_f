@@ -5,7 +5,7 @@ import {FilePen} from "lucide-react";
 import {UserData} from "@/components/shared/account/right-window/userData";
 
 interface CredentialsProps {
-    user: User ;
+    user: User | null;
     className?: string;
     onSwitchToEdit: () => void;
     onSwitchToAddress: () => void;

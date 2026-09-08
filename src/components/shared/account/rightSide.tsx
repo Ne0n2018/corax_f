@@ -8,7 +8,7 @@ import {Edit} from "@/components/shared/account/right-window/edit";
 import {AddressAutocomplete} from "@/components/shared/account/right-window/addressAutoComplite";
 
 interface CredentialsProps {
-    user: User ;
+    user: User | null ;
     className?: string;
 }
 

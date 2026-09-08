@@ -2,7 +2,7 @@ import {cn, formatDateToShort, splitDisplayName} from "@/lib/utils";
 import {User} from "@/types/user";
 
 interface UserDataProps {
-    user: User;
+    user: User | null;
     className?: string;
 }
 
