@@ -22,13 +22,13 @@ export const EditSchema = z.object({
         .or(z.literal(''))
         .refine((val) => val === '' || isValidDateString(val), { message: "Неверный формат. Используйте ДД.ММ.ГГГГ" })
         .transform((dateString) => {
-            if (!dateString) return undefined; // Если поле пустое, на бэкенд уйдет undefined
+            if (!dateString) return ""; // Замени undefined на пустую строку
             const [day, month, year] = dateString.split('.');
             const dateUTC = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
             return dateUTC.toISOString();
         }),
     number: z.string()
-        .transform((val) => val.replace(/[\s\(\)\-]/g, '')) // Убираем маску, если она есть
+        .transform((val) => val.replace(/[\s()\-]/g, '')) // Убираем маску, если она есть
         .pipe(
             z.string().regex(/^\+375\d{9}$/, "Некорректный номер").or(z.literal(''))
         ),
