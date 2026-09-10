@@ -1,4 +1,4 @@
-name: Build and Push Frontend Image
+name: Build, Push and Deploy Frontend
 
 on:
   push:
@@ -22,7 +22,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Этот шаг снизит регистр Ne0n2018/corax_f -> ne0n2018/corax_f
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -42,5 +41,21 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXT_PUBLIC_SERVER_URL=https://corax.by/api
+            NEXT_PUBLIC_DADATA_API_KEY=e4cbf1bafaa5e6324a67d04ba7c495215692bc96
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # Новый шаг: подключение к VPS и обновление контейнера
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ${{ secrets.VPS_PROJECT_PATH }}
+            docker compose pull frontend
+            docker compose up -d frontend
+            docker image prune -f
