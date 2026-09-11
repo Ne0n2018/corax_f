@@ -20,7 +20,7 @@ interface UserState {
     getUsers: () => Promise<void>;
     updateRole: (userId: string, role: Roles) => Promise<boolean>;
     blockUser: (userId: string, message?: string) => Promise<boolean>;
-    unBlockUser: (userId: string) => Promise<boolean>;
+    unBlockUser: (userId: string, message?: string) => Promise<boolean>;
 }
 
 export const useUserStore = create<UserState>((set, get) => ({
@@ -145,9 +145,9 @@ export const useUserStore = create<UserState>((set, get) => ({
         }
     },
 
-    unBlockUser: async (userId: string) => {
+    unBlockUser: async (userId: string, message?: string) => {
         try {
-            await api.put(`/admin/users/block/${userId}`);
+            await api.put(`/admin/users/block/${userId}`, { message });
             toast.success("Пользователь разблокирован");
 
             set((state) => ({

@@ -27,7 +27,7 @@ export function UserItem({ user }: Props) {
         if (user.isActive) {
             setIsBlockModalOpen(true);
         } else {
-            unBlockUser(user.id);
+            unBlockUser(user.id,'разблокировать');
         }
     };
 
