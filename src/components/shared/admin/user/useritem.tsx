@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function UserItem({ user }: Props) {
-    const { updateRole, blockUser,  } = useUserStore();
+    const { updateRole, blockUser, unBlockUser, isLoading } = useUserStore();
     const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
 
     const handleRoleChange = (newRole: Roles) => {
@@ -27,7 +27,7 @@ export function UserItem({ user }: Props) {
         if (user.isActive) {
             setIsBlockModalOpen(true);
         } else {
-            blockUser(user.id);
+            unBlockUser(user.id);
         }
     };
 
@@ -47,7 +47,7 @@ export function UserItem({ user }: Props) {
                 {/* Управление */}
                 <div className="flex items-center gap-3">
                     {/* Выбор роли */}
-                    <UserRoleSelect currentRole={user.role} onChange={handleRoleChange} />
+                    <UserRoleSelect currentRole={user.role} onChange={handleRoleChange} isLoading={isLoading} />
 
                     {/* Кнопка Статуса */}
                     <Button
@@ -58,6 +58,7 @@ export function UserItem({ user }: Props) {
                                 ? "bg-[#D83C2D] hover:bg-[#b83325] text-white"
                                 : "bg-green-600 hover:bg-green-700 text-white"
                         )}
+                        disabled={isLoading}
                     >
                         {user.isActive ? "Заблокировать" : "Разблокировать"}
                     </Button>
