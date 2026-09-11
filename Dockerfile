@@ -4,11 +4,10 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Устанавливаем pnpm напрямую через npm, чтобы избежать сбоев Corepack
+# Устанавливаем pnpm напрямую через npm
 RUN npm install -g pnpm@9
 
 COPY package.json pnpm-lock.yaml* ./
-# Если lockfile отсутствует или отличается от package.json, используем обычную установку
 RUN pnpm i
 
 FROM base AS builder
@@ -17,6 +16,14 @@ RUN npm install -g pnpm@latest
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# --- Принимаем build-аргументы из GitHub Actions ---
+ARG NEXT_PUBLIC_SERVER_URL
+ARG NEXT_PUBLIC_DADATA_API_KEY
+
+# --- Пробрасываем их в ENV, чтобы Next.js увидел их при сборке ---
+ENV NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
+ENV NEXT_PUBLIC_DADATA_API_KEY=$NEXT_PUBLIC_DADATA_API_KEY
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
