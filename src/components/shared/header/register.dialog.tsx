@@ -60,19 +60,19 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
     };
 
     return (<>
-                <DialogHeader className='flex justify-center flex-row bg-[url("/bg-register.png")] bg-center bg-no-repeat'>
-                    <Image className='absolute -top-30.5 -left-8' src={"/register.png"} alt={'register'} width={203} height={223} />
-                    <DialogTitle className='text-black font-russo mx-48 my-11.75'>
+                <DialogHeader className='shrink-0 relative flex justify-center items-center bg-[url("/bg-register.png")] bg-contain bg-center bg-no-repeat min-h-22.5 md:min-h-35 p-4 md:p-0'>
+                    <Image className='absolute -top-12 -left-7 w-31 h-33.5 md:-top-30 md:-left-8 md:w-50.75 md:h-55.75 z-20' src={"/register.png"} alt={'register'} width={203} height={223} />
+                    <DialogTitle className='text-black font-russo text-lg md:text-2xl py-2 md:py-10 z-10'>
                         Зарегистрируйтесь в Corax
                     </DialogTitle>
                 </DialogHeader>
-                <div className={'flex flex-col overflow-y-auto max-h-[40vh] mt-2'}>
+                <div className={'flex-1 flex flex-col overflow-y-auto px-4 py-4 md:px-10 custom-scrollbar rounded-b-3xl'}>
                     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
                         <div className='flex flex-col gap-3.75'>
                             <div>
                                 <Input
                                     {...register("name")}
-                                    className='border-gray-600 border text-black py-5.5 pl-7.5 w-full'
+                                    className='border-gray-400 border text-black py-4 md:py-6 pl-5 md:pl-7 w-full rounded-[13px]'
                                     type='text'
                                     placeholder='Введите имя пользователя... '
                                     disabled={isPending}
@@ -83,7 +83,7 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
                             <div>
                                 <Input
                                     {...register("email")}
-                                    className='border-gray-600 border text-black py-5.5 pl-7.5 w-full'
+                                    className='border-gray-400 border text-black py-4 md:py-6 pl-5 md:pl-7 w-full rounded-[13px]'
                                     type='email'
                                     placeholder='Введите электронный адрес... '
                                     disabled={isPending}
@@ -105,7 +105,7 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
                             <div>
                                 <Input
                                     {...register("confirmPassword")}
-                                    className='border-gray-600 border text-black py-5.5 pl-7.5 w-full'
+                                    className='border-gray-400 border text-black py-4 md:py-6 pl-5 md:pl-7 w-full rounded-[13px]'
                                     type='password'
                                     placeholder='Повторите пароль...'
                                     disabled={isPending}
