@@ -23,7 +23,7 @@ const defaultNavigationLinks: HeaderNavLink[] = [
     { href: "/admin/product", label: "Управление каталогом", active: true },
     { href: '/admin/provider', label: 'Управление поставщиками' },
     { href: "/admin/order", label: "Управление заказами" },
-    { href: "/admin/marketing", label: "Маркетинг" },
+    { href: "/admin/marketing/promoCode", label: "Маркетинг" },
     { href: '/admin/user', label: 'Пользователи'}
 ]
 

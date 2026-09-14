@@ -38,3 +38,50 @@ export function formatDateToShort(dateInput?: string | Date | null): string {
 
   return `${day}.${month}.${year}`;
 }
+
+export function cleanSubcategories(input: any): string[] | null {
+  if (!input) return null;
+
+  let items: any[] = [];
+
+  // 1. Если пришла строка, пробуем распарсить JSON (даже если он был застрингован дважды)
+  if (typeof input === "string") {
+    try {
+      let parsed = JSON.parse(input);
+      if (typeof parsed === "string") parsed = JSON.parse(parsed); // защита от двойной строки
+      if (Array.isArray(parsed)) items = parsed;
+    } catch {
+      // Если это просто обычная одиночная строка-ID
+      if (input.trim() && !input.includes("[")) {
+        items = [input.trim()];
+      }
+    }
+  } else if (Array.isArray(input)) {
+    items = input;
+  }
+
+  // 2. Отбираем ТОЛЬКО валидные ID (длиной > 1 символа, без мусорных знаков)
+  const validIds = items
+      .flatMap((item) => {
+        if (typeof item === "string" && (item.startsWith("[") || item.includes('"'))) {
+          try {
+            const p = JSON.parse(item);
+            return Array.isArray(p) ? p : item;
+          } catch {
+            return item;
+          }
+        }
+        return item;
+      })
+      .filter((item): item is string => {
+        if (typeof item !== "string") return false;
+        const trimmed = item.trim();
+        // Настоящий ID категории всегда длиннее 1 символа и не содержит JSON-мусор
+        return (
+            trimmed.length > 1 &&
+            !["[", "]", '"', "\\", ",", " "].some((badChar) => trimmed.includes(badChar))
+        );
+      });
+
+  return validIds.length > 0 ? validIds : null;
+}

@@ -151,7 +151,7 @@ export const useUserStore = create<UserState>((set, get) => ({
             toast.success("Пользователь разблокирован");
 
             set((state) => ({
-                users: state.users.map((u) => (u.id === userId ? { ...u, isActive: false } : u)),
+                users: state.users.map((u) => (u.id === userId ? { ...u, isActive: true } : u)),
             }));
             return true;
         } catch (error: any) {

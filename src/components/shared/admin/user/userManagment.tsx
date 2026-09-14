@@ -8,11 +8,11 @@ import {UserSearch} from "@/components/shared/admin/user/userSearch";
 import {UserItem} from "@/components/shared/admin/user/useritem";
 
 export function UserManagement() {
-    const { users, meta, isLoading, getUsers, params, setParams } = useUserStore();
+    const { users, meta, isLoading, getUsers, params, setParams, blockUser, unBlockUser } = useUserStore();
 
     useEffect(() => {
         getUsers();
-    }, [params.page]);
+    }, [params.page,blockUser, unBlockUser]);
 
     return (
         <div className="flex flex-col gap-6 p-4 ">

@@ -5,6 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+
+  --color-promo-active: #3BD82D;
+  --color-promo-unactive: #D37D75;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
