@@ -10,7 +10,7 @@ import {UploadCloud} from "lucide-react";
 import {useProviderStore} from "@/store/provider.store";
 import {ProviderFormValues, providerSchema} from "@/schemas/provider.schema";
 import {cn} from "@/lib/utils";
-import {ImagePreview} from "@/components/shared/admin/product/imagePreview";
+import {ImagePreview} from "@/components/ui/imagePreview";
 
 interface ProviderFormProps {
     id?: string;

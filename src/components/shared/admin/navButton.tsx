@@ -27,6 +27,14 @@ export function NavButton() {
             return { label: 'Удалить товар', href: '', isAction: true };
         }
 
+        if (pathname === '/admin/marketing/promoCode') {
+            return {label: 'акции', href: '/admin/marketing/discount', isAction: false };
+        }
+
+        if (pathname === '/admin/marketing/discount') {
+            return { label: 'промокоды', href: '/admin/marketing/promoCode', isAction: false };
+        }
+
         return { label: 'Назад', href: '/admin/product', isAction: false };
     };
 

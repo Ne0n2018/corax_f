@@ -16,9 +16,9 @@ import Image from "next/image";
 import {X} from "lucide-react";
 import {DynamicFieldArray} from "@/components/shared/admin/product/dynamicFieldArray";
 import {TEXT_FIELDS} from "@/components/shared/admin/product/static/textField";
-import {ImagePreview} from "@/components/shared/admin/product/imagePreview";
 import {SelectWithSearch} from "@/components/ui/selectWithSearch";
 import {cn} from "@/lib/utils";
+import {ImagePreview} from "@/components/ui/imagePreview";
 
 type ProductFormValues = z.input<typeof productSchema>;
 type ProductFormOutput = z.output<typeof productSchema>;
