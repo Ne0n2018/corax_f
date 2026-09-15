@@ -10,13 +10,13 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {productSchema} from "@/schemas/product.create.schema";
 import {DynamicFieldArray} from "@/components/shared/admin/product/dynamicFieldArray";
-import {ImagePreview} from "@/components/shared/admin/product/imagePreview";
 import {TEXT_FIELDS} from "@/components/shared/admin/product/static/textField";
 import {cn} from "@/lib/utils";
 import {useCategoryStore} from "@/store/category.store";
 import {useEffect} from "react";
 import {SelectWithSearch} from "@/components/ui/selectWithSearch";
 import {useProviderStore} from "@/store/provider.store";
+import {ImagePreview} from "@/components/ui/imagePreview";
 
 type ProductFormValues = z.input<typeof productSchema>;
 type ProductFormOutput = z.output<typeof productSchema>;
