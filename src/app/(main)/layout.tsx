@@ -41,7 +41,7 @@ export default function RootLayout({
       <main className={'flex-1'}>
           <AppLoader>
               <AuthProvider>
-                  <Navbar />
+                  <Navbar className={'mb-0 pb-0'}/>
                   {children}
                   <Suspense>
                       <PasswordRecoveryDialog/>

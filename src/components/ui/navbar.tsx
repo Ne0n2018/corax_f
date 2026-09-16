@@ -90,14 +90,14 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         return (
             <header
                 className={cn(
-                    "sticky top-0 z-50 w-full mt-1 transition-all duration-300 **:no-underline",
+                    " top-0 z-50 w-full mt-1 transition-all duration-300 **:no-underline",
 
                 )}
                 ref={ref}
                 {...props}
             >
                 <Container>
-                    <div className={cn("flex min-h-21.25 py-2 max-w-screen-2xl items-center justify-between", isMobile && 'bg-[#2C2C31] rounded-[15px]', user && "bg-[#2C2C31] px-6 md:px-7.5 rounded-[20px]"  )}>
+                    <div className={cn("flex min-h-21.25 py-2 max-w-screen-2xl items-center justify-between", isMobile && 'bg-[#2C2C31] rounded-[15px]', user && "bg-[#2C2C31] px-6 md:px-7.5 rounded-[20px]", className )}>
                         {/* Left side */}
                         <div className="flex items-center gap-2">
                             {isMobile && (

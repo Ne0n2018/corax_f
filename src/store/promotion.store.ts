@@ -17,6 +17,7 @@ interface PromotionStoreProps {
     getById: (id: string) => Promise<void>;
     update: (id: string, data: Partial<PromotionCreate>) => Promise<boolean>;
     deletePromotion: (id: string) => Promise<boolean>;
+    getActive: () => Promise<void>;
 }
 
 export const usePromotionStore = create<PromotionStoreProps>((set) => ({
@@ -170,4 +171,16 @@ export const usePromotionStore = create<PromotionStoreProps>((set) => ({
             return false;
         }
     },
+
+    getActive: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.get('/promotions/active');
+            set({isLoading: false, promotions: response.data});
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || "Ошибка при удалении акции";
+            set({ isLoading: false, error: errorMessage });
+            toast.error(errorMessage);
+        }
+    }
 }));

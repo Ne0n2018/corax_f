@@ -45,7 +45,7 @@ export const useCategoryStore = create<CategoryStore>((set) => ({
     getForSelect: async () => {
         set({ isLoading: true, error: null });
         try {
-            const response = await api.get<Category[]>("admin/sabCategory");
+            const response = await api.get<Category[]>("admin/subcategory");
 
             set({ isLoading: false, error: null, category: response.data });
         } catch (error: any) {
