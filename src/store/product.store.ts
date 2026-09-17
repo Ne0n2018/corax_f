@@ -1,7 +1,13 @@
 import {create} from "zustand";
 import {api} from "@/lib/api";
-import {AdminProduct, ProductsApiResponse,} from "@/types/products";
+import {AdminProduct, ProductsApiResponse, UserCurrentProduct, UserProduct} from "@/types/products";
 import {toast} from "sonner";
+
+interface GetForCatalogParams {
+    name?: string;
+    subCategoryId?: string;
+    loadMore?: boolean;
+}
 
 interface ProductStoreProps {
     isLoading: boolean;
@@ -9,13 +15,22 @@ interface ProductStoreProps {
     error: string | null;
     products: AdminProduct[];
     currentProduct: AdminProduct | null;
+    currentUserProduct: UserCurrentProduct | null;
     nextCursor: string | null;
+
+    // Новые поля для пользовательского каталога
+    userProducts: UserProduct[];
+    userNextCursor: string | null;
 
     adminGet: (name?: string, loadMore?: boolean) => Promise<void>;
     adminCreate: (data: any) => Promise<boolean>;
     adminGetById: (id: string) => Promise<void>;
     adminUpdate: (id: string, data: any) => Promise<boolean>;
     adminDelete: (id: string) => Promise<boolean>;
+
+    // Обновлённый метод получения товаров каталога
+    getForCatalog: (params?: GetForCatalogParams) => Promise<void>;
+    getCurrentProduct: (id: string) => Promise<void>;
 }
 
 export const useProductStore = create<ProductStoreProps>((set, get) => ({
@@ -23,8 +38,11 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
     isFetchingMore: false,
     error: null,
     products: [],
+    userProducts: [],
     nextCursor: null,
+    userNextCursor: null,
     currentProduct: null,
+    currentUserProduct: null,
 
     adminGet: async (name = "", loadMore = false) => {
         const { nextCursor, products } = get();
@@ -38,19 +56,17 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
         try {
             const params = new URLSearchParams();
 
-            // Бэкенд фильтрует по dto.name
             if (name) params.append("name", name);
             if (loadMore && nextCursor) params.append("cursor", nextCursor);
 
             const response = await api.get<ProductsApiResponse>(`/admin/product?${params.toString()}`);
-
             const newProducts = response.data.data || [];
 
             set({
                 isLoading: false,
                 isFetchingMore: false,
                 products: loadMore ? [...products, ...newProducts] : newProducts,
-                nextCursor: response.data.nextCursor,
+                nextCursor: response.data.nextCursor || null,
             });
         } catch (error: any) {
             set({
@@ -67,7 +83,7 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
         try {
             const formData = new FormData();
 
-            formData.append('image', data.image)
+            formData.append("image", data.image);
             formData.append("name", data.name);
             formData.append("defaultPrice", String(data.defaultPrice));
             formData.append("isClothes", String(data.isClothes));
@@ -79,40 +95,37 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
             formData.append("structure", data.structure);
             formData.append("formRelease", data.formRelease);
 
-            // 3. Массивы объектов отправляем строкой JSON
             formData.append("size", JSON.stringify(data.size));
             formData.append("taste", JSON.stringify(data.taste));
             formData.append("characteristic", JSON.stringify(data.characteristic));
 
-            // 4. Отправляем НАПРЯМУЮ экземпляр formData
             await api.post("/admin/product", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                }
+                },
             });
 
             set({ isLoading: false });
-            toast.success('Товар успешно создан')
+            toast.success("Товар успешно создан");
             return true;
         } catch (error: any) {
             set({
                 isLoading: false,
                 error: error.response?.data?.message || "Ошибка при создании товара",
             });
-            toast.error(error.response?.data?.message)
+            toast.error(error.response?.data?.message);
             return false;
         }
-
     },
 
-    adminGetById: async (id: string) =>{
-        set({isLoading: true, error: null})
+    adminGetById: async (id: string) => {
+        set({ isLoading: true, error: null });
         try {
-            const response = await api.get(`/admin/product/${id}`)
-            set({isLoading: false, error: null, currentProduct: response.data})
+            const response = await api.get(`/admin/product/${id}`);
+            set({ isLoading: false, error: null, currentProduct: response.data });
         } catch (error: any) {
-            set({isLoading: false, error: error.response?.message})
-            toast.error(error.response?.message)
+            set({ isLoading: false, error: error.response?.data?.message });
+            toast.error(error.response?.data?.message);
         }
     },
 
@@ -121,7 +134,6 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
         try {
             const formData = new FormData();
 
-            // Добавляем файл только если загружен НОВЫЙ File (не строка URL)
             if (data.image instanceof File) {
                 formData.append("image", data.image, data.image.name);
             }
@@ -141,8 +153,7 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
             formData.append("taste", JSON.stringify(data.taste));
             formData.append("characteristic", JSON.stringify(data.characteristic));
 
-            // Отправляем PATCH или PUT запрос
-            await api.put(`/admin/product${id}`, formData);
+            await api.put(`/admin/product/${id}`, formData);
 
             set({ isLoading: false });
             return true;
@@ -156,18 +167,72 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
     },
 
     adminDelete: async (id: string) => {
-        set({isLoading: true, error: null})
+        set({ isLoading: true, error: null });
 
         try {
-            const response = await api.delete(`/admin/product${id}`)
-            set({isLoading: false, error: null})
-            toast.success(response.data.message)
+            const response = await api.delete(`/admin/product/${id}`);
+            set({ isLoading: false, error: null });
+            toast.success(response.data?.message || "Товар удален");
             return true;
         } catch (error: any) {
-            set({isLoading: false, error: error.response?.data.message})
-            toast.error(error.response?.data?.message)
+            set({ isLoading: false, error: error.response?.data?.message });
+            toast.error(error.response?.data?.message);
             return false;
+        }
+    },
+
+    // Новый метод с поддержкой курсора, подкатегорий и поиска по названию
+    getForCatalog: async (params = {}) => {
+        const { loadMore = false, name, subCategoryId } = params;
+        const { userNextCursor, userProducts } = get();
+
+        if (loadMore) {
+            if (!userNextCursor) return;
+            set({ isFetchingMore: true, error: null });
+        } else {
+            set({ isLoading: true, error: null });
+        }
+
+        try {
+            const queryParams = new URLSearchParams();
+
+            if (name) queryParams.append("name", name);
+            if (subCategoryId) queryParams.append("subCategoryId", subCategoryId);
+            if (loadMore && userNextCursor) queryParams.append("cursor", userNextCursor);
+
+            const response = await api.get(`/product?${queryParams.toString()}`);
+            const newProducts = response.data.data || [];
+
+            set({
+                isLoading: false,
+                isFetchingMore: false,
+                userProducts: loadMore ? [...userProducts, ...newProducts] : newProducts,
+                userNextCursor: response.data.nextCursor || null,
+            });
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || "Ошибка при получении списка продуктов";
+            set({
+                isLoading: false,
+                isFetchingMore: false,
+                userProducts: loadMore ? userProducts : [],
+                error: errorMessage,
+            });
+            toast.error(errorMessage);
+        }
+    },
+
+    getCurrentProduct: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.get<UserCurrentProduct>(`/product/${id}`);
+            set({ isLoading: false, error: null, currentUserProduct: response.data });
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || "Ошибка при получении списка продуктов";
+            set({
+                isLoading: false,
+                error: errorMessage,
+            });
+            toast.error(errorMessage);
         }
     }
 }));
-

@@ -29,9 +29,10 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  children, modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -43,6 +44,7 @@ export default function RootLayout({
               <AuthProvider>
                   <Navbar className={'mb-0 pb-0'}/>
                   {children}
+                  {modal}
                   <Suspense>
                       <PasswordRecoveryDialog/>
                   </Suspense>

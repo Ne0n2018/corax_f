@@ -102,7 +102,7 @@ export function SecondSection() {
                             index === 2 ? "hidden md:block" : ""
                         }`}
                     >
-                        <Link href={`/catalog/${topProduct.id}`} className="group block w-full h-full relative">
+                        <Link href={`/(.)catalog/${topProduct.id}`} className="group block w-full h-full relative">
                             <Image
                                 src={topProduct.imageUrl}
                                 alt={topProduct.name}
