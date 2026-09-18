@@ -34,6 +34,11 @@ export interface ProductsApiResponse {
     nextCursor: string | null;
 }
 
+export interface ProductOption {
+    name: string;
+    value: number;
+}
+
 export interface UserCurrentProduct {
     id: string;
     name: string;
@@ -46,25 +51,15 @@ export interface UserCurrentProduct {
     formRelease: string;
     defaultPrice: number;
     subCategoryId: string;
-    characteristic: [
-        {
-            name: string;
-            value: string;
-        }
-    ]
-    Taste: [
-        {
-            name: string;
-            value: number;
-        }
-    ]
-    Size :[
-        {
-            name: string;
-            value: number;
-        }
-    ]
+    characteristic: Array<{
+        name: string;
+        value: string;
+    }>;
+    Taste?: ProductOption[];
+    Size?: ProductOption[];
+    taste?: ProductOption[];
+    size?: ProductOption[];
     Provider: {
         name: string;
-    }
+    };
 }

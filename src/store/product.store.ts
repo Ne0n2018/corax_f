@@ -22,6 +22,10 @@ interface ProductStoreProps {
     userProducts: UserProduct[];
     userNextCursor: string | null;
 
+    // Похожие товары для модального окна
+    similarProducts: UserProduct[];
+    isSimilarLoading: boolean;
+
     adminGet: (name?: string, loadMore?: boolean) => Promise<void>;
     adminCreate: (data: any) => Promise<boolean>;
     adminGetById: (id: string) => Promise<void>;
@@ -31,6 +35,8 @@ interface ProductStoreProps {
     // Обновлённый метод получения товаров каталога
     getForCatalog: (params?: GetForCatalogParams) => Promise<void>;
     getCurrentProduct: (id: string) => Promise<void>;
+    getSimilarProducts: (subCategoryId: string) => Promise<void>;
+    clearSimilarProducts: () => void;
 }
 
 export const useProductStore = create<ProductStoreProps>((set, get) => ({
@@ -39,6 +45,8 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
     error: null,
     products: [],
     userProducts: [],
+    similarProducts: [],
+    isSimilarLoading: false,
     nextCursor: null,
     userNextCursor: null,
     currentProduct: null,
@@ -201,13 +209,22 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
             if (loadMore && userNextCursor) queryParams.append("cursor", userNextCursor);
 
             const response = await api.get(`/product?${queryParams.toString()}`);
-            const newProducts = response.data.data || [];
+            const rawData = response.data;
+            const newProducts = Array.isArray(rawData)
+                ? rawData
+                : Array.isArray(rawData?.data)
+                ? rawData.data
+                : Array.isArray(rawData?.products)
+                ? rawData.products
+                : [];
+
+            const nextCursor = !Array.isArray(rawData) ? (rawData?.nextCursor || null) : null;
 
             set({
                 isLoading: false,
                 isFetchingMore: false,
                 userProducts: loadMore ? [...userProducts, ...newProducts] : newProducts,
-                userNextCursor: response.data.nextCursor || null,
+                userNextCursor: nextCursor,
             });
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || "Ошибка при получении списка продуктов";
@@ -224,8 +241,10 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
     getCurrentProduct: async (id: string) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await api.get<UserCurrentProduct>(`/product/${id}`);
-            set({ isLoading: false, error: null, currentUserProduct: response.data });
+            const response = await api.get<any>(`/product/${id}`);
+            const rawData = response.data;
+            const product = rawData?.data || rawData;
+            set({ isLoading: false, error: null, currentUserProduct: product });
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || "Ошибка при получении списка продуктов";
             set({
@@ -234,5 +253,28 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
             });
             toast.error(errorMessage);
         }
+    },
+
+    getSimilarProducts: async (subCategoryId: string) => {
+        set({ isSimilarLoading: true });
+        try {
+            const response = await api.get(`/product?subCategoryId=${encodeURIComponent(subCategoryId)}`);
+            const rawData = response.data;
+            const products = Array.isArray(rawData)
+                ? rawData
+                : Array.isArray(rawData?.data)
+                ? rawData.data
+                : Array.isArray(rawData?.products)
+                ? rawData.products
+                : [];
+
+            set({ isSimilarLoading: false, similarProducts: products });
+        } catch (error: any) {
+            set({ isSimilarLoading: false, similarProducts: [] });
+        }
+    },
+
+    clearSimilarProducts: () => {
+        set({ similarProducts: [], isSimilarLoading: false });
     }
 }));

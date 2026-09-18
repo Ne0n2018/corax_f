@@ -6,6 +6,9 @@ import {ChevronRight, Heart, Minus, Plus} from 'lucide-react'
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import {useFavoriteStore} from '@/store/favorite.store'
 import {useProductStore} from "@/store/product.store"
+import {useCartStore} from '@/store/cart.store'
+import {ProductOption} from "@/types/products"
+import {AddToCart} from "@/types/cart"
 
 interface ProductDetailModalProps {
     productId: string
@@ -17,10 +20,20 @@ interface ProductDetailModalProps {
 export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct }: ProductDetailModalProps) {
     const [quantity, setQuantity] = useState(1)
     const [isExpanded, setIsExpanded] = useState(false)
+    const [selectedSize, setSelectedSize] = useState<ProductOption | null>(null)
+    const [selectedTaste, setSelectedTaste] = useState<ProductOption | null>(null)
+    const [isSubmittingCart, setIsSubmittingCart] = useState(false)
     const modalContentRef = useRef<HTMLDivElement>(null)
 
     const { favoriteProductId, addToFavorite, deleteFavorite } = useFavoriteStore()
-    const { getForCatalog, userProducts, getCurrentProduct, currentUserProduct } = useProductStore()
+    const { addToCart, isLoading: isCartLoading } = useCartStore()
+    const {
+        getCurrentProduct,
+        currentUserProduct,
+        similarProducts: storeSimilarProducts,
+        getSimilarProducts,
+        clearSimilarProducts,
+    } = useProductStore()
 
     const isFavorite = Array.isArray(favoriteProductId)
         ? favoriteProductId.includes(productId)
@@ -33,19 +46,46 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
         }
     }, [productId, getCurrentProduct])
 
-    // 2. Отправляем айди подкатегории товара в getForCatalog
+    // 2. Отправляем айди подкатегории товара для получения похожих товаров
     useEffect(() => {
-        const subcategoryId = currentUserProduct.subCategoryId || currentUserProduct?.subCategoryId
-        if (subcategoryId) {
-            getForCatalog({subCategoryId: subcategoryId})
-        }
-    }, [currentUserProduct.subCategoryId, getForCatalog])
+        const subcategoryId =
+            currentUserProduct?.subCategoryId ||
+            (currentUserProduct as any)?.subCategory?.id ||
+            (currentUserProduct as any)?.sub_category_id ||
+            (currentUserProduct as any)?.subCategory;
 
-    // 3. Сбрасываем скролл, счетчик и состояние описания при смене текущего товара
+        if (subcategoryId !== undefined && subcategoryId !== null && String(subcategoryId).trim() !== '') {
+            getSimilarProducts(String(subcategoryId));
+        }
+    }, [currentUserProduct, getSimilarProducts]);
+
+    // 3. Сбрасываем скролл, счетчик, состояние описания и выбранные вариации при смене текущего товара
     useEffect(() => {
         if (currentUserProduct?.id) {
             setQuantity(1)
             setIsExpanded(false)
+
+            const prodSizes: ProductOption[] = (
+                currentUserProduct.Size ||
+                (currentUserProduct as any).size ||
+                []
+            ).map((item: any) => ({
+                name: item.name,
+                value: Number(item.value ?? item.price ?? 0),
+            }))
+
+            const prodTastes: ProductOption[] = (
+                currentUserProduct.Taste ||
+                (currentUserProduct as any).taste ||
+                []
+            ).map((item: any) => ({
+                name: item.name,
+                value: Number(item.value ?? item.price ?? 0),
+            }))
+
+            setSelectedSize(prodSizes.length > 0 ? prodSizes[0] : null)
+            setSelectedTaste(prodTastes.length > 0 ? prodTastes[0] : null)
+
             if (modalContentRef.current) {
                 modalContentRef.current.scrollTo({ top: 0, behavior: 'smooth' })
             }
@@ -68,10 +108,67 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
         }
     }
 
+    // Доступные размеры и вкусы/цвета
+    const sizes: ProductOption[] = (
+        currentUserProduct?.Size ||
+        (currentUserProduct as any)?.size ||
+        []
+    ).map((item: any) => ({
+        name: item.name,
+        value: Number(item.value ?? item.price ?? 0),
+    }))
+
+    const tastes: ProductOption[] = (
+        currentUserProduct?.Taste ||
+        (currentUserProduct as any)?.taste ||
+        []
+    ).map((item: any) => ({
+        name: item.name,
+        value: Number(item.value ?? item.price ?? 0),
+    }))
+
+    // Вычисление цены с учётом выбранных опций
+    const sizeExtra = selectedSize ? Number(selectedSize.value || 0) : 0
+    const tasteExtra = selectedTaste ? Number(selectedTaste.value || 0) : 0
+    const unitPrice = Number(currentUserProduct?.defaultPrice || 0) + sizeExtra + tasteExtra
+    const totalPrice = unitPrice * quantity
+    const tasteLabel = currentUserProduct?.isClothes ? 'Цвет' : 'Вкус'
+
+    // Добавление в корзину (отправляем столько раз, сколько выбрано единиц товара)
+    const handleAddToCart = async () => {
+        if (!currentUserProduct?.id) return;
+
+        const sizeName = selectedSize?.name || (sizes.length > 0 ? sizes[0].name : 'Стандартный');
+        const tasteName = selectedTaste?.name || (tastes.length > 0 ? tastes[0].name : 'Стандартный');
+
+        const dto: AddToCart = {
+            productId: currentUserProduct.id,
+            price: unitPrice,
+            taste: tasteName,
+            size: sizeName,
+        };
+
+        setIsSubmittingCart(true);
+        try {
+            for (let i = 0; i < quantity; i++) {
+                await addToCart(dto, i !== quantity - 1);
+            }
+        } catch {
+            // Ошибка уже обработана тостом в сторе
+        } finally {
+            setIsSubmittingCart(false);
+        }
+    };
+
     // Фильтруем список, чтобы текущий товар не попал в "Похожие"
-    const similarProducts = Array.isArray(userProducts)
-        ? userProducts.filter((product) => product.id !== currentUserProduct?.id)
-        : []
+    const currentId = currentUserProduct?.id || (currentUserProduct as any)?._id;
+    const similarProducts = Array.isArray(storeSimilarProducts)
+        ? storeSimilarProducts.filter((product) => {
+              const prodId = product.id || (product as any)?._id;
+              return prodId !== currentId;
+          })
+        : [];
+
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -116,8 +213,15 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
                                 </button>
                             </div>
 
-                            <div className="text-2xl font-semibold text-[#D83C2D] mb-4">
-                                {currentUserProduct?.defaultPrice} p.
+                            <div className="flex items-baseline gap-3 mb-4">
+                                <div className="text-2xl font-semibold text-[#D83C2D]">
+                                    {totalPrice} p.
+                                </div>
+                                {quantity > 1 && (
+                                    <span className="text-xs text-gray-500 font-medium">
+                                        ({unitPrice} p. / шт)
+                                    </span>
+                                )}
                             </div>
 
                             <div className="mb-4">
@@ -127,10 +231,77 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
                                 </p>
                             </div>
 
-                            <div className="mb-8.25">
+                            <div className="mb-4">
                                 <h3 className="text-xs font-bold text-black uppercase mb-1">Форма выпуска</h3>
                                 <p className="text-xs sm:text-sm text-gray-700 font-medium">{currentUserProduct?.formRelease}</p>
                             </div>
+
+                            {/* Выбор размера */}
+                            {sizes.length > 0 && (
+                                <div className="mb-4">
+                                    <h3 className="text-xs font-bold text-black uppercase mb-2">
+                                        Размер: <span className="font-medium text-gray-500">{selectedSize?.name}</span>
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {sizes.map((size, index) => {
+                                            const isSelected = selectedSize?.name === size.name
+                                            return (
+                                                <button
+                                                    key={`${size.name}-${index}`}
+                                                    type="button"
+                                                    onClick={() => setSelectedSize(size)}
+                                                    className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium border transition-all ${
+                                                        isSelected
+                                                            ? 'border-[#D83C2D] bg-[#D83C2D]/10 text-[#D83C2D] shadow-xs'
+                                                            : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white'
+                                                    }`}
+                                                >
+                                                    {size.name}
+                                                    {size.value > 0 && (
+                                                        <span className="ml-1 text-[11px] opacity-75">
+                                                            (+{size.value} р.)
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Выбор вкуса или цвета */}
+                            {tastes.length > 0 && (
+                                <div className="mb-6">
+                                    <h3 className="text-xs font-bold text-black uppercase mb-2">
+                                        {tasteLabel}:{' '}
+                                        <span className="font-medium text-gray-500">{selectedTaste?.name}</span>
+                                    </h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {tastes.map((taste, index) => {
+                                            const isSelected = selectedTaste?.name === taste.name
+                                            return (
+                                                <button
+                                                    key={`${taste.name}-${index}`}
+                                                    type="button"
+                                                    onClick={() => setSelectedTaste(taste)}
+                                                    className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-medium border transition-all ${
+                                                        isSelected
+                                                            ? 'border-[#D83C2D] bg-[#D83C2D]/10 text-[#D83C2D] shadow-xs'
+                                                            : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white'
+                                                    }`}
+                                                >
+                                                    {taste.name}
+                                                    {taste.value > 0 && (
+                                                        <span className="ml-1 text-[11px] opacity-75">
+                                                            (+{taste.value} р.)
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Панель управления количеством и покупки */}
@@ -147,7 +318,7 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
                                 <button
                                     type="button"
                                     onClick={() => setQuantity((prev) => prev + 1)}
-                                    className="p-3 hover:bg-gray-200 text-gray-600 transition-colors shadow"
+                                    className="p-3 hover:bg-gray-200 rounded-[13px] text-gray-600 transition-colors shadow"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </button>
@@ -155,9 +326,11 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
 
                             <button
                                 type="button"
-                                className="flex-1 min-w-30 border border-[#D83C2D] text-[#D83C2D] hover:bg-[#D83C2D]/5 font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl transition-colors text-center"
+                                onClick={handleAddToCart}
+                                disabled={isSubmittingCart || isCartLoading}
+                                className="flex-1 min-w-30 border border-[#D83C2D] text-[#D83C2D] hover:bg-[#D83C2D]/5 font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl transition-colors text-center disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                В корзину
+                                {isSubmittingCart ? 'Добавление...' : 'В корзину'}
                             </button>
 
                             <button

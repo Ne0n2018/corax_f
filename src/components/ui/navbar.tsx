@@ -13,6 +13,8 @@ import Link from "next/link"
 import Image from "next/image"
 import {ArrowDown, UserRound} from "lucide-react"
 import {AccountDialog, AccountModal} from "@/components/shared/header/account.dialog"
+import {CartSheet} from "@/components/shared/cart/cart-sheet"
+import {useCartStore} from "@/store/cart.store"
 import useIsMobile from "@/hooks/use-is-mobile"
 
 // Hamburger icon component
@@ -83,9 +85,19 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     ) => {
         const [accountMode, setAccountMode] = useState<AccountModal>(null)
         const [authMode, setAuthMode] = useState<AuthModal>(null)
+        const [isCartOpen, setIsCartOpen] = useState(false)
 
         const { user } = useUserStore()
-        const {isMobile} = useIsMobile()
+        const { isMobile } = useIsMobile()
+        const { cart, getCart } = useCartStore()
+
+        React.useEffect(() => {
+            if (user) {
+                getCart()
+            }
+        }, [user, getCart])
+
+        const cartTotalItems = cart?.CartItem?.reduce((acc, item) => acc + item.quantity, 0) || 0
 
         return (
             <header
@@ -186,8 +198,18 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                         <div className="flex items-center gap-3">
                             {user ? (
                                 <div className="flex items-center gap-2">
-                                    <Button className="px-2.25 py-4.25 bg-[#46464E] rounded-xl">
+                                    <Button
+                                        type="button"
+                                        onClick={() => setIsCartOpen(true)}
+                                        className="relative px-2.25 py-4.25 bg-[#46464E] hover:bg-[#575760] rounded-xl transition-colors cursor-pointer"
+                                        aria-label="Корзина"
+                                    >
                                         <ArrowDown size={17} />
+                                        {cartTotalItems > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 bg-[#D83C2D] text-white text-[10px] font-bold min-w-4.5 h-4.5 px-1 rounded-full flex items-center justify-center ring-2 ring-[#2C2C31]">
+                                                {cartTotalItems > 99 ? '99+' : cartTotalItems}
+                                            </span>
+                                        )}
                                     </Button>
                                     <Button
                                         className="p-2.5 bg-[#46464E] rounded-xl"
@@ -229,6 +251,10 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                                 mode={accountMode}
                                 onModeChange={(newMode) => setAccountMode(newMode)}
                                 onClose={() => setAccountMode(null)}
+                            />
+                            <CartSheet
+                                isOpen={isCartOpen}
+                                onOpenChange={setIsCartOpen}
                             />
                         </div>
                     </div>

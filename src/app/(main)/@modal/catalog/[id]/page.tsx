@@ -14,6 +14,7 @@ export default function ProductModalPage() {
             productId={productId}
             isOpen={true}
             onClose={() => router.back()}
+            onSelectProduct={(id) => router.replace(`/catalog/${id}`, { scroll: false })}
         />
     )
 }
