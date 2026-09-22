@@ -2,6 +2,7 @@ import React from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Plus, Trash2} from "lucide-react";
+import {cn} from "@/lib/utils";
 
 interface DynamicFieldArrayProps {
     title: string;
@@ -56,7 +57,10 @@ export const DynamicFieldArray = React.memo(({
                                 <Input
                                     placeholder={placeholder1}
                                     {...register(`${fieldName}.${idx}.name` as const)}
-                                    className="bg-[#2A2A2A] border-none text-white rounded-[14px] px-4 py-6 focus-visible:ring-1 focus-visible:ring-red-500 w-full"
+                                    className={cn(
+                                        "bg-[#2A2A2A] border text-white rounded-[14px] px-4 py-6 focus-visible:ring-1 focus-visible:ring-red-500 w-full",
+                                        itemErrors?.name ? "border-red-500" : "border-transparent"
+                                    )}
                                 />
                             </div>
                             <div className="flex-1">
@@ -64,7 +68,10 @@ export const DynamicFieldArray = React.memo(({
                                     type={isNumber ? "number" : "text"}
                                     placeholder={placeholder2}
                                     {...register(`${fieldName}.${idx}.${valKey}` as const, { valueAsNumber: isNumber })}
-                                    className="bg-[#2A2A2A] border-none text-white rounded-[14px] px-4 py-6 focus-visible:ring-1 focus-visible:ring-red-500 w-full"
+                                    className={cn(
+                                        "bg-[#2A2A2A] border text-white rounded-[14px] px-4 py-6 focus-visible:ring-1 focus-visible:ring-red-500 w-full",
+                                        itemErrors?.[valKey] ? "border-red-500" : "border-transparent"
+                                    )}
                                 />
                             </div>
 

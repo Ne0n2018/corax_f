@@ -11,6 +11,25 @@ export enum PaymentType {
     CARD   = 'CARD',
 }
 
+export enum OrderStatus {
+    PENDING    = 'PENDING',
+    PAID       = 'PAID',
+    PROCESSING = 'PROCESSING',
+    SHIPPED    = 'SHIPPED',
+    DELIVERED  = 'DELIVERED',
+    CANCELLED  = 'CANCELLED',
+}
+
+export interface OrderItem {
+    id: string;
+    productName: string;
+    imageUrl?: string;
+    taste?: string;
+    size?: string;
+    price: number;
+    quantity: number;
+}
+
 export interface CreateOrderDto {
     deliveryType: DeliveryType;
     address?: string;
@@ -20,16 +39,18 @@ export interface CreateOrderDto {
 
 export interface OrderResponse {
     id: string;
+    orderCode?: number;
     userId: string;
     deliveryType: DeliveryType;
     paymentType: PaymentType;
-    address?: string;
-    status: string;
+    address?: string | null;
+    status: OrderStatus | string;
     totalAmount: number;
     subtotalAmount: number;
     discountAmount: number;
     deliveryPrice: number;
     promoCode?: string;
+    items?: OrderItem[];
     createdAt?: string;
 }
 

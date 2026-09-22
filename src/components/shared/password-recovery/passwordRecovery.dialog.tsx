@@ -35,15 +35,28 @@ export function PasswordRecoveryDialog() {
     // Форма заблокирована, если выполняется загрузка или сабмит
     const isPending = isLoading || isSubmitting;
 
-    // Извлекаем токен из URL
-    const findToken = searchParams.get("token");
+    // Исключаем страницы оформления заказа, оплаты и корзины,
+    // где query-параметр "token" принадлежит платёжному шлюзу (bePaid и др.)
+    const isExcludedPath = pathname.startsWith('/orders') || pathname.startsWith('/cart');
 
-    // Окно открыто только при наличии токена
+    // Извлекаем токен восстановления пароля только на разрешенных путях
+    // Поддерживаем как явный resetToken, так и token на главной или странице /new-password
+    const findToken = !isExcludedPath
+        ? searchParams.get("resetToken") || (pathname === '/new-password' || pathname === '/' ? searchParams.get("token") : null)
+        : null;
+
+    // Окно открыто только при наличии валидного токена восстановления
     const isOpen = Boolean(findToken);
 
     const handleClose = () => {
+        if (pathname === '/new-password') {
+            router.replace('/');
+            return;
+        }
+
         const params = new URLSearchParams(searchParams.toString());
         params.delete("token");
+        params.delete("resetToken");
 
         const newQuery = params.toString();
         const newUrl = newQuery ? `${pathname}?${newQuery}` : pathname;
@@ -60,6 +73,8 @@ export function PasswordRecoveryDialog() {
         } catch (error) {
         }
     };
+
+    if (!isOpen) return null;
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -104,7 +119,7 @@ export function PasswordRecoveryDialog() {
                     <Button
                         type="submit"
                         disabled={isPending}
-                        className="py-3.5 rounded-[13px] mt-4 mb-6.25"
+                        className="py-3.5 rounded-[13px] mt-4 mb-6.25 cursor-pointer"
                     >
                         {isPending ? "Сохранение пароля..." : "Сохранить пароль"}
                     </Button>

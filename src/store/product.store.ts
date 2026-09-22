@@ -164,12 +164,24 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
             await api.put(`/admin/product/${id}`, formData);
 
             set({ isLoading: false });
+            toast.success("Товар успешно обновлен");
             return true;
         } catch (error: any) {
+            const rawMsg = error.response?.data?.message;
+            let message = "Ошибка при обновлении товара";
+            if (Array.isArray(rawMsg)) {
+                message = rawMsg
+                    .map((e: any) => (typeof e === "string" ? e : Object.values(e.constraints || {}).join(", ")))
+                    .filter(Boolean)
+                    .join("; ");
+            } else if (typeof rawMsg === "string") {
+                message = rawMsg;
+            }
             set({
                 isLoading: false,
-                error: error.response?.data?.message || "Ошибка при обновлении товара",
+                error: message,
             });
+            toast.error(message);
             return false;
         }
     },

@@ -16,6 +16,7 @@ interface SelectWithSearchProps {
     placeholder: string;
     error?: string;
     isLoading?: boolean;
+    fallbackLabel?: string;
 }
 
 export const SelectWithSearch = ({
@@ -25,6 +26,7 @@ export const SelectWithSearch = ({
                                      placeholder,
                                      error,
                                      isLoading = false,
+                                     fallbackLabel,
                                  }: SelectWithSearchProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -32,21 +34,28 @@ export const SelectWithSearch = ({
 
     // Находим выбранный элемент для отображения
     const selectedOption = options?.find((opt) => opt.id === value);
+    const displayLabel = selectedOption?.name || (value && fallbackLabel ? fallbackLabel : placeholder);
 
     // Фильтрация вариантов по поисковому запросу
     const filteredOptions = options?.filter((opt) =>
         opt.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Закрытие выпадающего списка при клике вне его
+    // Закрытие при клике вне компонента
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                containerRef.current &&
+                !containerRef.current.contains(event.target as Node)
+            ) {
                 setIsOpen(false);
             }
         };
+
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
     return (
@@ -55,10 +64,12 @@ export const SelectWithSearch = ({
             <button
                 type="button"
                 onClick={() => setIsOpen((prev) => !prev)}
-                className="w-full bg-[#46464E] hover:bg-[#5a5a65] text-white rounded-[14px] px-4 py-3 text-sm flex items-center justify-between transition-colors h-11"
+                className={`w-full bg-[#46464E] hover:bg-[#5a5a65] text-white rounded-[14px] px-4 py-3 text-sm flex items-center justify-between transition-colors h-11 border ${
+                    error ? "border-red-500 ring-1 ring-red-500/50" : "border-transparent"
+                }`}
             >
-                <span className="truncate">
-                    {selectedOption ? selectedOption.name : placeholder}
+                <span className={`truncate ${!selectedOption && !(value && fallbackLabel) ? "text-white/50" : "text-white"}`}>
+                    {displayLabel}
                 </span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
             </button>

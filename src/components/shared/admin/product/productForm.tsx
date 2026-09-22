@@ -7,7 +7,7 @@ import {useProviderStore} from "@/store/provider.store";
 import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {Checkbox} from "@/components/ui/checkbox";
+import {Switch} from "@/components/ui/switch";
 import {Controller, SubmitHandler, useFieldArray, useForm, useWatch} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,6 +19,7 @@ import {TEXT_FIELDS} from "@/components/shared/admin/product/static/textField";
 import {SelectWithSearch} from "@/components/ui/selectWithSearch";
 import {cn} from "@/lib/utils";
 import {ImagePreview} from "@/components/ui/imagePreview";
+import {toast} from "sonner";
 
 type ProductFormValues = z.input<typeof productSchema>;
 type ProductFormOutput = z.output<typeof productSchema>;
@@ -51,6 +52,7 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
         formState: { errors },
     } = useForm<ProductFormValues, any, ProductFormOutput>({
         resolver: zodResolver(productSchema),
+        mode: "onTouched",
         defaultValues: {
             image: undefined,
             isClothes: false,
@@ -74,36 +76,50 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
                 formRelease: initialData.formRelease || "",
                 defaultPrice: Number(initialData.defaultPrice) || 0,
                 isClothes: Boolean(initialData.isClothes),
-                subCategoryId: initialData.subCategoryId || "",
-                providerId: initialData.providerId || "",
+                subCategoryId: initialData.subCategoryId || initialData.subCategory?.id || "",
+                providerId: initialData.providerId || initialData.Provider?.id || "",
 
-                // Характеристики (с маленькой буквы 'characteristic')
+                // Характеристики (characteristic или characteristics)
                 characteristic: Array.isArray(initialData.characteristic)
                     ? initialData.characteristic.map((item: any) => ({
                         name: item.name || "",
                         value: item.value || "",
                     }))
-                    : [],
+                    : Array.isArray((initialData as any).characteristics)
+                        ? (initialData as any).characteristics.map((item: any) => ({
+                            name: item.name || "",
+                            value: item.value || "",
+                        }))
+                        : [],
 
-                // Размеры (с большой буквы 'Size' в JSON)
+                // Размеры (Size или size)
                 size: Array.isArray(initialData.Size)
                     ? initialData.Size.map((item: any) => ({
                         name: item.name || "",
                         price: Number(item.price) || 0,
                     }))
-                    : [],
+                    : Array.isArray((initialData as any).size)
+                        ? (initialData as any).size.map((item: any) => ({
+                            name: item.name || "",
+                            price: Number(item.price) || 0,
+                        }))
+                        : [],
 
-                // Вкусы (с большой буквы 'Taste' в JSON)
+                // Вкусы (Taste или taste)
                 taste: Array.isArray(initialData.Taste)
                     ? initialData.Taste.map((item: any) => ({
                         name: item.name || "",
                         price: Number(item.price) || 0,
                     }))
-                    : [],
+                    : Array.isArray((initialData as any).taste)
+                        ? (initialData as any).taste.map((item: any) => ({
+                            name: item.name || "",
+                            price: Number(item.price) || 0,
+                        }))
+                        : [],
             });
 
             if (initialData.imageUrl) {
-                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setExistingImageUrl(initialData.imageUrl);
             }
         }
@@ -129,7 +145,7 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
         } else {
             // Если это создание, проверяем наличие файла вручную
             if (!data.image) {
-                alert("Загрузите изображение товара");
+                toast.error("Загрузите изображение товара");
                 return;
             }
             isSuccess = await adminCreate(data);
@@ -140,9 +156,19 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
         }
     };
 
-    
+    const onInvalid = (formErrors: any) => {
+        toast.error("Заполните все обязательные поля");
+        const firstErrorKey = Object.keys(formErrors)[0];
+        if (firstErrorKey) {
+            const el = document.querySelector(`[name="${firstErrorKey}"]`) || document.getElementById(firstErrorKey);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        }
+    };
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className={cn("flex flex-col gap-6 w-full", className)}>
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className={cn("flex flex-col gap-6 w-full", className)}>
             {/* Превью фото: Новое выложенное (File) ИЛИ Старое с бэка (URL) */}
             {watchedImage instanceof File ? (
                 <ImagePreview
@@ -202,6 +228,7 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
                             placeholder="Выбрать категорию"
                             isLoading={isCategoriesLoading}
                             error={errors.subCategoryId?.message}
+                            fallbackLabel={initialData?.subCategory?.name}
                         />
                     )}
                 />
@@ -218,44 +245,56 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
                             placeholder="Выбрать поставщика"
                             isLoading={isProvidersLoading}
                             error={errors.providerId?.message}
+                            fallbackLabel={initialData?.Provider?.name}
                         />
                     )}
                 />
 
-                {/* Чекбокс "Это одежда?" */}
-                <label className="flex items-center gap-3 text-white text-sm cursor-pointer ml-2 py-1 select-none">
+                {/* Переключатель "Это одежда?" */}
+                <div className="flex items-center gap-3 text-white text-sm ml-2 py-1 select-none">
                     <Controller
                         control={control}
                         name="isClothes"
                         render={({ field }) => (
-                            <Checkbox
+                            <Switch
+                                id="isClothes"
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
-                                className="w-5 h-5 rounded bg-[#2A2A2A] border-none data-[state=checked]:bg-red-500 data-[state=checked]:text-white"
                             />
                         )}
                     />
-                    Это одежда?
-                </label>
+                    <label htmlFor="isClothes" className="cursor-pointer">
+                        Это одежда?
+                    </label>
+                </div>
             </div>
 
             {/* Текстовые инпуты */}
             <div className="flex flex-col gap-4">
-                {TEXT_FIELDS.map((field) => (
-                    <div key={field.name}>
-                        <label className="text-white text-sm ml-2 block mb-1">{field.label}</label>
-                        <Input
-                            {...register(field.name as keyof ProductFormValues)}
-                            placeholder={field.placeholder}
-                            className="bg-[#2C2C31] border-[#50505E] text-white rounded-[20px] px-7.5 py-5.75 focus-visible:ring-1 focus-visible:ring-red-500"
-                        />
-                        {errors[field.name as keyof ProductFormValues] && (
-                            <span className="text-red-500 text-xs ml-2 mt-1 block">
-                                {errors[field.name as keyof ProductFormValues]?.message as string}
-                            </span>
-                        )}
-                    </div>
-                ))}
+                {TEXT_FIELDS.map((field) => {
+                    const fieldError = errors[field.name as keyof ProductFormValues];
+                    return (
+                        <div key={field.name}>
+                            <label className="text-white text-sm ml-2 block mb-1">{field.label}</label>
+                            <Input
+                                id={field.name}
+                                {...register(field.name as keyof ProductFormValues)}
+                                placeholder={field.placeholder}
+                                className={cn(
+                                    "bg-[#2C2C31] border text-white rounded-[20px] px-7.5 py-5.75 focus-visible:ring-1",
+                                    fieldError
+                                        ? "border-red-500 focus-visible:ring-red-500"
+                                        : "border-[#50505E] focus-visible:ring-red-500"
+                                )}
+                            />
+                            {fieldError && (
+                                <span className="text-red-500 text-xs ml-2 mt-1 block">
+                                    {fieldError?.message as string}
+                                </span>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Динамические массивы */}
@@ -300,10 +339,17 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
             <div className="w-1/2">
                 <label className="text-white text-sm ml-2 block mb-1">Стоимость товара</label>
                 <Input
+                    id="defaultPrice"
                     type="number"
+                    step="0.01"
                     {...register("defaultPrice", { valueAsNumber: true })}
                     placeholder="Введите стоимость товара..."
-                    className="bg-[#2A2A2A] border-none text-white rounded-[20px] px-7.5 py-5 focus-visible:ring-1 focus-visible:ring-red-500"
+                    className={cn(
+                        "bg-[#2A2A2A] border text-white rounded-[20px] px-7.5 py-5 focus-visible:ring-1",
+                        errors.defaultPrice
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : "border-transparent focus-visible:ring-red-500"
+                    )}
                 />
                 {errors.defaultPrice && <span className="text-red-500 text-xs ml-2 mt-1 block">{errors.defaultPrice.message}</span>}
             </div>
