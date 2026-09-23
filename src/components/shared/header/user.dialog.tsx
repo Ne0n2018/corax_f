@@ -18,11 +18,11 @@ interface NavLink {
     label: string
 }
 
-const navLinks:NavLink[] = [
-    {href:'/comparison', label:'Сравнение товаров'},
-    {href:'/favourites', label:'Избранное'},
-    {href:'/order', label:'Ваши заказы'},
-    {href:'/purchases', label:'Ваши покупки'},
+const navLinks: NavLink[] = [
+    { href: '/account/comparison', label: 'Сравнение товаров' },
+    { href: '/account/favourites', label: 'Избранное' },
+    { href: '/account/orders', label: 'Ваши заказы' },
+    { href: '/account/purchases', label: 'Ваши покупки' },
 ]
 
 export function User({ onSwitchToNotify, onClose }: UserProps) {

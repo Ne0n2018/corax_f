@@ -8,6 +8,30 @@ const nextConfig: NextConfig = {
   },
   output: "standalone",
   reactCompiler: true,
+  async redirects() {
+    return [
+      {
+        source: '/order',
+        destination: '/account/orders',
+        permanent: true,
+      },
+      {
+        source: '/purchases',
+        destination: '/account/purchases',
+        permanent: true,
+      },
+      {
+        source: '/favourites',
+        destination: '/account/favourites',
+        permanent: true,
+      },
+      {
+        source: '/comparison',
+        destination: '/account/comparison',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

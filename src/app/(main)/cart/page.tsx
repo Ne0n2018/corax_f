@@ -17,13 +17,16 @@ import {toast} from 'sonner'
 
 export default function CartCheckoutPage() {
     const { cart, isLoading: isCartLoading, getCart, updateQuantity } = useCartStore()
-    const { user, getMe } = useUserStore()
+    const { user, getMe, updateMe } = useUserStore()
     const { createOrder, isSubmitting } = useOrderStore()
 
     // Состояния выбранных позиций (по умолчанию выбраны все товары из корзины)
     const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
     const [deliveryType, setDeliveryType] = useState<DeliveryType>(DeliveryType.DELIVERY)
     const [address, setAddress] = useState<string>('')
+    const [recipientName, setRecipientName] = useState<string>('')
+    const [recipientPhone, setRecipientPhone] = useState<string>('')
+    const [saveRecipientToProfile, setSaveRecipientToProfile] = useState<boolean>(true)
     const [paymentType, setPaymentType] = useState<PaymentType>(PaymentType.ONLINE)
     const [promoCode, setPromoCode] = useState<string>('')
     const [promoDiscount, setPromoDiscount] = useState<number>(0)
@@ -49,12 +52,27 @@ export default function CartCheckoutPage() {
         }
     }, [cart])
 
-    // Инициализация адреса из профиля пользователя
+    // Инициализация адреса и данных получателя из профиля пользователя
     useEffect(() => {
-        if (user?.address && !address) {
-            setAddress(user.address)
+        if (user) {
+            if (user.address && !address) {
+                setAddress(user.address)
+            }
+            if (user.displayName && !recipientName) {
+                setRecipientName(user.displayName)
+            }
+            if (user.number && !recipientPhone) {
+                setRecipientPhone(user.number)
+            }
         }
-    }, [user, address])
+    }, [user, address, recipientName, recipientPhone])
+
+    // Для Европочты разрешена только онлайн-оплата картой
+    useEffect(() => {
+        if (deliveryType === DeliveryType.EUROMAIL && paymentType !== PaymentType.ONLINE) {
+            setPaymentType(PaymentType.ONLINE)
+        }
+    }, [deliveryType, paymentType])
 
     const items = cart?.CartItem || []
     const selectedItems = items.filter((item) => selectedItemIds.includes(item.id))
@@ -117,31 +135,57 @@ export default function CartCheckoutPage() {
 
     // Валидация возможности оформления
     const isAddressRequired = deliveryType !== DeliveryType.PICKUP
+    const isEuromail = deliveryType === DeliveryType.EUROMAIL
     const canSubmit =
         selectedItems.length > 0 &&
-        (!isAddressRequired || (address && address.trim().length > 3))
+        (!isAddressRequired || (address && address.trim().length > 3)) &&
+        (!isEuromail || (recipientName.trim().length >= 2 && recipientPhone.trim().length >= 7))
 
     // Оформление заказа
     const handleSubmitOrder = async () => {
         if (!canSubmit) {
             if (isAddressRequired && (!address || address.trim().length < 4)) {
                 toast.error('Пожалуйста, укажите адрес доставки')
+            } else if (isEuromail && (!recipientName.trim() || recipientName.trim().length < 2)) {
+                toast.error('Для Европочты обязательно укажите ФИО получателя')
+            } else if (isEuromail && (!recipientPhone.trim() || recipientPhone.trim().length < 7)) {
+                toast.error('Для Европочты обязательно укажите номер телефона получателя')
             } else if (selectedItems.length === 0) {
                 toast.error('Выберите хотя бы один товар для оформления')
             }
             return
         }
 
+        // Опционально сохраняем ФИО и телефон в профиле, если включен чекбокс и данные изменились
+        if (isEuromail && saveRecipientToProfile && user) {
+            const needUpdateName = recipientName.trim() !== (user.displayName || '')
+            const needUpdatePhone = recipientPhone.trim() !== (user.number || '')
+            if (needUpdateName || needUpdatePhone) {
+                updateMe(
+                    recipientName.trim(),
+                    recipientPhone.trim(),
+                    user.birthday || undefined
+                ).catch((err) => console.error('Не удалось обновить профиль:', err))
+            }
+        }
+
         const effectiveAddress =
             deliveryType === DeliveryType.PICKUP
                 ? 'г. Минск, ул. Братская 14, Спортивный зал Адреналин'
+                : deliveryType === DeliveryType.EUROMAIL
+                ? `${address.trim()} (Получатель: ${recipientName.trim()}, тел: ${recipientPhone.trim()})`
                 : address.trim()
+
+        const finalPaymentType =
+            deliveryType === DeliveryType.EUROMAIL ? PaymentType.ONLINE : paymentType
 
         const result = await createOrder({
             deliveryType,
             address: effectiveAddress,
-            paymentType,
+            paymentType: finalPaymentType,
             promoCode: promoCode || undefined,
+            recipientName: isEuromail ? recipientName.trim() : undefined,
+            recipientPhone: isEuromail ? recipientPhone.trim() : undefined,
         })
 
         if (result) {
@@ -252,12 +296,20 @@ export default function CartCheckoutPage() {
                             address={address}
                             onAddressChange={setAddress}
                             savedUserAddress={user?.address}
+                            recipientName={recipientName}
+                            onRecipientNameChange={setRecipientName}
+                            recipientPhone={recipientPhone}
+                            onRecipientPhoneChange={setRecipientPhone}
+                            saveRecipientToProfile={saveRecipientToProfile}
+                            onSaveRecipientToProfileChange={setSaveRecipientToProfile}
+                            isUserAuth={Boolean(user)}
                         />
 
                         {/* 2. Способ оплаты (без хранения данных карты) */}
                         <CheckoutPayment
                             paymentType={paymentType}
                             onSelectPaymentType={setPaymentType}
+                            deliveryType={deliveryType}
                         />
 
                         {/* 3. Промокод */}

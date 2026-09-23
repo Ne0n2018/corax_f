@@ -22,6 +22,8 @@ export enum OrderStatus {
 
 export interface OrderItem {
     id: string;
+    productId?: string;
+    productItemId?: string;
     productName: string;
     imageUrl?: string;
     taste?: string;
@@ -35,6 +37,8 @@ export interface CreateOrderDto {
     address?: string;
     paymentType: PaymentType;
     promoCode?: string;
+    recipientName?: string;
+    recipientPhone?: string;
 }
 
 export interface OrderResponse {

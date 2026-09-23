@@ -4,8 +4,11 @@ import { CreateOrderDto, CreateOrderResult, OrderResponse } from '@/types/order'
 import { toast } from 'sonner';
 
 interface OrderState {
+    orders: OrderResponse[];
+    isLoadingOrders: boolean;
     isSubmitting: boolean;
     error: string | null;
+    getUserOrders: () => Promise<OrderResponse[]>;
     createOrder: (dto: CreateOrderDto) => Promise<CreateOrderResult | null>;
     getOrder: (orderId: string) => Promise<OrderResponse | null>;
     getPaymentUrl: (orderId: string) => Promise<string | null>;
@@ -13,8 +16,23 @@ interface OrderState {
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
+    orders: [],
+    isLoadingOrders: false,
     isSubmitting: false,
     error: null,
+
+    getUserOrders: async () => {
+        set({ isLoadingOrders: true, error: null });
+        try {
+            const response = await api.get<OrderResponse[]>('/order');
+            set({ orders: response.data || [], isLoadingOrders: false });
+            return response.data || [];
+        } catch (error: any) {
+            const message = error.response?.data?.message || 'Не удалось загрузить заказы';
+            set({ isLoadingOrders: false, error: message });
+            return [];
+        }
+    },
 
     createOrder: async (dto: CreateOrderDto) => {
         set({ isSubmitting: true, error: null });

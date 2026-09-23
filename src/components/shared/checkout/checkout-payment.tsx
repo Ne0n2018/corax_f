@@ -1,20 +1,31 @@
 'use client'
 
 import React from 'react'
-import { PaymentType } from '@/types/order'
+import { DeliveryType, PaymentType } from '@/types/order'
 import { CreditCard, Banknote } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface CheckoutPaymentProps {
     paymentType: PaymentType
     onSelectPaymentType: (type: PaymentType) => void
+    deliveryType?: DeliveryType
 }
 
 export function CheckoutPayment({
     paymentType,
     onSelectPaymentType,
+    deliveryType,
 }: CheckoutPaymentProps) {
+    const isEuromail = deliveryType === DeliveryType.EUROMAIL
     const isOnline = paymentType === PaymentType.ONLINE
-    // При получении поддерживается как наличные (CASH), так и картой курьеру (CARD)
+
+    const handleSelectCash = () => {
+        if (isEuromail) {
+            toast.info('Для доставки Европочтой доступна только оплата сразу банковской картой')
+            return
+        }
+        onSelectPaymentType(PaymentType.CASH)
+    }
 
     return (
         <div className="space-y-2">
@@ -34,16 +45,20 @@ export function CheckoutPayment({
                     }`}
                 >
                     <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                    <span>Сразу</span>
+                    <span>Сразу картой</span>
                 </button>
 
                 <button
                     type="button"
-                    onClick={() => onSelectPaymentType(PaymentType.CASH)}
-                    className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                        !isOnline
-                            ? 'bg-[#D83C2D] text-white shadow-xs'
-                            : 'text-gray-700 hover:text-black hover:bg-gray-50'
+                    onClick={handleSelectCash}
+                    disabled={isEuromail}
+                    title={isEuromail ? 'Недоступно для Европочты' : undefined}
+                    className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+                        isEuromail
+                            ? 'opacity-40 cursor-not-allowed bg-gray-50 text-gray-400'
+                            : !isOnline
+                            ? 'bg-[#D83C2D] text-white shadow-xs cursor-pointer'
+                            : 'text-gray-700 hover:text-black hover:bg-gray-50 cursor-pointer'
                     }`}
                 >
                     <Banknote className="w-3.5 h-3.5 shrink-0" />
@@ -53,7 +68,9 @@ export function CheckoutPayment({
 
             {/* Информационная подсказка по выбранному способу */}
             <p className="text-[11px] text-gray-400 pl-1">
-                {isOnline
+                {isEuromail
+                    ? 'Для доставки Европочтой доступна только оплата сразу банковской картой'
+                    : isOnline
                     ? 'Безопасная онлайн-оплата банковской картой через платежную систему'
                     : 'Оплата наличными или банковской картой при получении заказа'}
             </p>
