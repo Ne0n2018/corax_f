@@ -74,7 +74,7 @@ export const useCategoryStore = create<CategoryStore>((set) => ({
         set({isLoading: true})
 
         try {
-            await api.put(`/admin/category${id}`, data)
+            await api.put(`/admin/category/${id}`, data)
             set({ isLoading: false });
             toast.success("Категория успешно обновлена");
             return true;
@@ -102,7 +102,7 @@ export const useCategoryStore = create<CategoryStore>((set) => ({
         set({ isLoading: true, error: null });
 
         try {
-            const response = await api.delete(`/admin/category${id}`)
+            const response = await api.delete(`/admin/category/${id}`)
             toast.success(response.data.message)
             set({ isLoading: false });
             return true
