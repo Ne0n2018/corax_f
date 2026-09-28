@@ -46,13 +46,13 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
     const items = cart?.CartItem || []
 
     // По умолчанию выбираем все позиции корзины
-    useEffect(() => {
-        if (items.length > 0) {
-            setSelectedItemIds(items.map((i) => i.id))
-        } else {
-            setSelectedItemIds([])
-        }
-    }, [items, items.length])
+useEffect(() => {
+    if (cart?.CartItem && cart.CartItem.length > 0) {
+        setSelectedItemIds(cart.CartItem.map((i) => i.id))
+    } else {
+        setSelectedItemIds([])
+    }
+}, [cart?.CartItem]) // Зависимость только от реального массива из стора
 
 
     const selectedItems = items.filter((item) => selectedItemIds.includes(item.id))

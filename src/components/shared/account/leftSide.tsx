@@ -77,7 +77,7 @@ export function LeftSide({ user, isLoading, logOut, className }: LeftSideProps) 
                                         'w-full py-4.5 rounded-[13px] border justify-start pl-7.5 text-sm font-medium transition-all cursor-pointer',
                                         isActive
                                             ? 'bg-[#2C2C31] text-white border-[#2C2C31] shadow-xs hover:bg-[#38383E] hover:text-white'
-                                            : 'bg-white text-black border-[#B3B3B3] hover:bg-gray-50 hover:border-black'
+                                            : 'bg-white text-black border-[#B3B3B3] hover:bg-gray-50 hover:border-black hover:text-black'
                                     )}
                                 >
                                     {link.label}
