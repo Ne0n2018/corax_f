@@ -1,12 +1,38 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useOrderStore } from '@/store/order.store'
-import { DeliveryType, OrderResponse } from '@/types/order'
-import { ChevronLeft, ChevronRight, Package, PackageSearch, ShoppingBag } from 'lucide-react'
+import {
+    ACTIVE_ORDER_STATUSES,
+    DeliveryType,
+    getOrderStatusInfo,
+    isOrderUnpaid,
+    OrderResponse,
+} from '@/types/order'
+import {
+    ChevronLeft,
+    ChevronRight,
+    CreditCard,
+    Loader2,
+    Package,
+    PackageSearch,
+    ShoppingBag,
+    TriangleAlert,
+    X,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 interface OrdersWindowProps {
     className?: string
@@ -57,45 +83,87 @@ function getArrivalHeading(order: OrderResponse): string {
     return `Прибудет ${arrivalDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}`
 }
 
-// Текст и стили плашки статуса в карточке товара
-function getStatusBadge(status: string) {
-    switch (status) {
-        case 'SHIPPED':
-            return {
-                text: 'Заказ в пути',
-                className: 'bg-[#E5E5EA] text-[#3A3A3C] hover:bg-[#DCDCE2]',
-            }
-        case 'PROCESSING':
-            return {
-                text: 'Собирается',
-                className: 'bg-[#E5E5EA] text-[#3A3A3C]',
-            }
-        case 'PAID':
-            return {
-                text: 'В обработке',
-                className: 'bg-[#E5E5EA] text-[#3A3A3C]',
-            }
-        case 'PENDING':
-            return {
-                text: 'Ожидает оплаты',
-                className: 'bg-amber-100 text-amber-900',
-            }
-        case 'DELIVERED':
-            return {
-                text: 'Доставлен',
-                className: 'bg-emerald-100 text-emerald-900',
-            }
-        case 'CANCELLED':
-            return {
-                text: 'Отменен',
-                className: 'bg-gray-200 text-gray-500',
-            }
-        default:
-            return {
-                text: 'Заказ в пути',
-                className: 'bg-[#E5E5EA] text-[#3A3A3C]',
-            }
+// Панель действий для неоплаченного заказа: отмена и повторная оплата
+function OrderActions({ order }: { order: OrderResponse }) {
+    const { cancelOrder, getPaymentUrl, cancellingOrderId } = useOrderStore()
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+    const [isGettingUrl, setIsGettingUrl] = useState(false)
+
+    const isCancelling = cancellingOrderId === order.id
+
+    const handleCancel = async () => {
+        setIsConfirmOpen(false)
+        await cancelOrder(order.id)
     }
+
+    const handleGetPaymentUrl = async () => {
+        setIsGettingUrl(true)
+        try {
+            const redirectUrl = await getPaymentUrl(order.id)
+            if (redirectUrl) {
+                window.location.href = redirectUrl
+                return
+            }
+        } finally {
+            setIsGettingUrl(false)
+        }
+    }
+
+    const isBusy = isCancelling || isGettingUrl
+
+    return (
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:items-center pt-1">
+            <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+                <AlertDialogTrigger
+                    render={
+                        <button
+                            type="button"
+                            disabled={isBusy}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-white/15 text-white text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                        />
+                    }
+                >
+                    <X className="w-4 h-4" />
+                    Отменить заказ
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-[#2C2C31] text-white border-white/10 rounded-[20px]">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-white">
+                            Отменить заказ № {formatOrderCode(order.orderCode, order.id)}?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-400">
+                            Заказ будет отменен, а товары вернутся в каталог. Это действие нельзя отменить.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="bg-white/5 text-white border-white/15 hover:bg-white/10 hover:text-white">
+                            Оставить заказ
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleCancel}
+                            className="bg-[#D83C2D] text-white hover:bg-[#c43224]"
+                        >
+                            Да, отменить
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <button
+                type="button"
+                onClick={handleGetPaymentUrl}
+                disabled={isBusy}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D83C2D] text-white text-xs sm:text-sm font-medium hover:bg-[#c43224] transition-colors cursor-pointer disabled:opacity-50"
+            >
+                {isGettingUrl ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                    <CreditCard className="w-4 h-4" />
+                )}
+                Получить ссылку на оплату
+            </button>
+        </div>
+    )
 }
 
 // Компонент горизонтальной карусели для товаров одного заказа
@@ -127,9 +195,10 @@ function OrderCarousel({ order }: { order: OrderResponse }) {
     const items = order.items || []
     if (items.length === 0) return null
 
-    const statusBadge = getStatusBadge(order.status)
+    const statusBadge = getOrderStatusInfo(order.status)
     const arrivalHeading = getArrivalHeading(order)
     const orderCodeText = formatOrderCode(order.orderCode, order.id)
+    const unpaid = isOrderUnpaid(order.status)
 
     return (
         <div className="space-y-2.5">
@@ -214,7 +283,7 @@ function OrderCarousel({ order }: { order: OrderResponse }) {
                                         statusBadge.className
                                     )}
                                 >
-                                    {statusBadge.text}
+                                    {statusBadge.label}
                                 </div>
                             </div>
                         )
@@ -233,16 +302,22 @@ function OrderCarousel({ order }: { order: OrderResponse }) {
                     </button>
                 )}
             </div>
+
+            {/* Действия доступны только для неоплаченного заказа */}
+            {unpaid && <OrderActions order={order} />}
         </div>
     )
 }
 
 export function OrdersWindow({ className }: OrdersWindowProps) {
-    const { orders, isLoadingOrders, getUserOrders } = useOrderStore()
+    const { orders, isLoadingOrders, error, getUserOrders } = useOrderStore()
 
     useEffect(() => {
         getUserOrders()
     }, [getUserOrders])
+
+    // На этой странице — только заказы, которые ещё в работе
+    const activeOrders = orders.filter((order) => ACTIVE_ORDER_STATUSES.includes(order.status))
 
     return (
         <div className={cn('p-6 sm:p-7.5 bg-[#2C2C31] rounded-[20px] text-white min-h-[500px]', className)}>
@@ -252,7 +327,7 @@ export function OrdersWindow({ className }: OrdersWindowProps) {
                     Ваши заказы
                 </h2>
                 <p className="text-[#8E8E93] text-xs sm:text-sm mt-1">
-                    Следите за статусом и историей заказов в любое время
+                    Заказы в работе: оплата, сборка и доставка
                 </p>
             </div>
 
@@ -275,8 +350,30 @@ export function OrdersWindow({ className }: OrdersWindowProps) {
                 </div>
             )}
 
+            {/* Ошибка загрузки */}
+            {!isLoadingOrders && error && activeOrders.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+                    <div className="p-4 bg-white/5 rounded-full text-[#D83C2D]">
+                        <TriangleAlert className="w-12 h-12" />
+                    </div>
+                    <div className="space-y-1">
+                        <h3 className="text-base sm:text-lg font-bold text-white">
+                            Не удалось загрузить заказы
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-400 max-w-sm">{error}</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => getUserOrders()}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D83C2D] text-white font-medium text-xs sm:text-sm hover:bg-[#c43224] transition-colors cursor-pointer"
+                    >
+                        Попробовать снова
+                    </button>
+                </div>
+            )}
+
             {/* Пустое состояние */}
-            {!isLoadingOrders && orders.length === 0 && (
+            {!isLoadingOrders && !error && activeOrders.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
                     <div className="p-4 bg-white/5 rounded-full text-gray-400">
                         <PackageSearch className="w-12 h-12" />
@@ -286,7 +383,7 @@ export function OrdersWindow({ className }: OrdersWindowProps) {
                             У вас пока нет активных заказов
                         </h3>
                         <p className="text-xs sm:text-sm text-gray-400 max-w-sm">
-                            Здесь будут отображаться ваши покупки и статус их доставки
+                            Здесь будут отображаться заказы в работе и статус их доставки
                         </p>
                     </div>
                     <Link
@@ -300,9 +397,9 @@ export function OrdersWindow({ className }: OrdersWindowProps) {
             )}
 
             {/* Список заказов с каруселями */}
-            {!isLoadingOrders && orders.length > 0 && (
+            {!isLoadingOrders && activeOrders.length > 0 && (
                 <div className="space-y-7">
-                    {orders.map((order) => (
+                    {activeOrders.map((order) => (
                         <OrderCarousel key={order.id} order={order} />
                     ))}
                 </div>
