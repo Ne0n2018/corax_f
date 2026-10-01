@@ -1,7 +1,7 @@
 import {create} from "zustand";
 import {api} from "@/lib/api";
 import {toast} from "sonner";
-import {Provider, Providers} from "@/types/provider";
+import {Provider, Providers, PublicProvider} from "@/types/provider";
 
 interface ProviderStore {
     message: string | null;
@@ -10,10 +10,15 @@ interface ProviderStore {
     provider: Provider[];
     providers: Providers[];
     oneProvider: Providers | null;
+    // Публичный список поставщиков (бренды) для витрины
+    publicProviders: PublicProvider[];
+    isPublicLoading: boolean;
+    publicError: string | null;
 
     getForSelect: (name?: string) => Promise<void>;
     getAll: (name?: string) => Promise<void>;
     getById: (id: string) => Promise<void>;
+    getPublicProviders: () => Promise<void>;
     adminCreate: (data: FormData) => Promise<boolean>;
     adminUpdate: ( id: string, data: FormData) => Promise<boolean>;
     adminDelete: (id: string) => Promise<boolean>;
@@ -26,6 +31,10 @@ export const useProviderStore = create<ProviderStore>((set)=>({
     provider: [],
     providers: [],
     oneProvider: null,
+    publicProviders: [],
+    isPublicLoading: false,
+    publicError: null,
+
 
     getForSelect: async (name?: string) => {
         set({ isLoading: true, error: null });
@@ -67,6 +76,21 @@ export const useProviderStore = create<ProviderStore>((set)=>({
             toast.error(error.response?.data.message);
         }
     },
+
+    // Публичный список поставщиков (бренды) — GET /providers
+    getPublicProviders: async () => {
+        set({ isPublicLoading: true, publicError: null });
+        try {
+            const response = await api.get<PublicProvider[]>('/providers');
+            const data = Array.isArray(response.data) ? response.data : [];
+            set({ isPublicLoading: false, publicError: null, publicProviders: data });
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || "Ошибка при получении списка брендов";
+            set({ isPublicLoading: false, publicError: errorMessage, publicProviders: [] });
+            toast.error(errorMessage);
+        }
+    },
+
 
     adminCreate: async (data: FormData) => {
         set({ isLoading: true });

@@ -9,3 +9,11 @@ export type Providers = {
     imageUrl: string,
     description: string,
 }
+
+// Публичный ответ GET /providers
+export type PublicProvider = {
+    id: string,
+    name: string,
+    imageUrl?: string | null,
+    description?: string | null,
+}

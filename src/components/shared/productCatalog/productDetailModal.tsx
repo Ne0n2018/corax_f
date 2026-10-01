@@ -32,7 +32,6 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
         currentUserProduct,
         similarProducts: storeSimilarProducts,
         getSimilarProducts,
-        clearSimilarProducts,
     } = useProductStore()
 
     const isFavorite = Array.isArray(favoriteProductId)
