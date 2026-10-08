@@ -14,11 +14,15 @@ interface ProviderStore {
     publicProviders: PublicProvider[];
     isPublicLoading: boolean;
     publicError: string | null;
+    // Публичная карточка одного бренда (для диалога)
+    publicProvider: PublicProvider | null;
+    isPublicProviderLoading: boolean;
 
     getForSelect: (name?: string) => Promise<void>;
     getAll: (name?: string) => Promise<void>;
     getById: (id: string) => Promise<void>;
     getPublicProviders: () => Promise<void>;
+    getPublicProviderById: (id: string) => Promise<PublicProvider | null>;
     adminCreate: (data: FormData) => Promise<boolean>;
     adminUpdate: ( id: string, data: FormData) => Promise<boolean>;
     adminDelete: (id: string) => Promise<boolean>;
@@ -34,6 +38,9 @@ export const useProviderStore = create<ProviderStore>((set)=>({
     publicProviders: [],
     isPublicLoading: false,
     publicError: null,
+    publicProvider: null,
+    isPublicProviderLoading: false,
+
 
 
     getForSelect: async (name?: string) => {
@@ -88,6 +95,21 @@ export const useProviderStore = create<ProviderStore>((set)=>({
             const errorMessage = error.response?.data?.message || "Ошибка при получении списка брендов";
             set({ isPublicLoading: false, publicError: errorMessage, publicProviders: [] });
             toast.error(errorMessage);
+        }
+    },
+
+
+    // Публичная карточка бренда по id — GET /providers/{id}
+    getPublicProviderById: async (id: string) => {
+        set({ isPublicProviderLoading: true });
+        try {
+            const response = await api.get<PublicProvider>(`/providers/${id}`);
+            const data = response.data ?? null;
+            set({ isPublicProviderLoading: false, publicProvider: data });
+            return data;
+        } catch {
+            set({ isPublicProviderLoading: false, publicProvider: null });
+            return null;
         }
     },
 

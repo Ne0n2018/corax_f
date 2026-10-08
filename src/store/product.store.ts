@@ -26,6 +26,10 @@ interface ProductStoreProps {
     similarProducts: UserProduct[];
     isSimilarLoading: boolean;
 
+    // Товары выбранного бренда (для диалога о бренде)
+    brandProducts: UserProduct[];
+    isBrandProductsLoading: boolean;
+
     adminGet: (name?: string, loadMore?: boolean) => Promise<void>;
     adminCreate: (data: any) => Promise<boolean>;
     adminGetById: (id: string) => Promise<void>;
@@ -37,6 +41,9 @@ interface ProductStoreProps {
     getCurrentProduct: (id: string) => Promise<void>;
     getSimilarProducts: (subCategoryId: string) => Promise<void>;
     clearSimilarProducts: () => void;
+
+    // Товары бренда: фильтруем публичный каталог по имени производителя
+    getBrandProducts: (providerName: string, maxItems?: number) => Promise<void>;
 }
 
 export const useProductStore = create<ProductStoreProps>((set, get) => ({
@@ -47,6 +54,8 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
     userProducts: [],
     similarProducts: [],
     isSimilarLoading: false,
+    brandProducts: [],
+    isBrandProductsLoading: false,
     nextCursor: null,
     userNextCursor: null,
     currentProduct: null,
@@ -288,5 +297,54 @@ export const useProductStore = create<ProductStoreProps>((set, get) => ({
 
     clearSimilarProducts: () => {
         set({ similarProducts: [], isSimilarLoading: false });
-    }
+    },
+
+    // Публичный каталог не умеет фильтровать по providerId,
+    // поэтому постранично читаем /product и отбираем товары нужного производителя.
+    getBrandProducts: async (providerName: string, maxItems = 12) => {
+        const target = providerName.trim().toLowerCase();
+        if (!target) {
+            set({ brandProducts: [], isBrandProductsLoading: false });
+            return;
+        }
+
+        set({ isBrandProductsLoading: true, brandProducts: [] });
+
+        try {
+            const collected: UserProduct[] = [];
+            let cursor: string | null = null;
+            let pages = 0;
+            const MAX_PAGES = 8;
+
+            do {
+                const queryParams = new URLSearchParams();
+                if (cursor) queryParams.append("cursor", cursor);
+
+                const response = await api.get(`/product?${queryParams.toString()}`);
+                const rawData = response.data;
+                const items: UserProduct[] = Array.isArray(rawData)
+                    ? rawData
+                    : Array.isArray(rawData?.data)
+                    ? rawData.data
+                    : Array.isArray(rawData?.products)
+                    ? rawData.products
+                    : [];
+
+                for (const item of items) {
+                    const itemBrand = item?.Provider?.name;
+                    if (typeof itemBrand === "string" && itemBrand.trim().toLowerCase() === target) {
+                        collected.push(item);
+                        if (collected.length >= maxItems) break;
+                    }
+                }
+
+                cursor = !Array.isArray(rawData) ? (rawData?.nextCursor || null) : null;
+                pages += 1;
+            } while (cursor && collected.length < maxItems && pages < MAX_PAGES);
+
+            set({ isBrandProductsLoading: false, brandProducts: collected });
+        } catch {
+            set({ isBrandProductsLoading: false, brandProducts: [] });
+        }
+    },
 }));
