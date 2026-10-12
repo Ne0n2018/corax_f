@@ -4,6 +4,8 @@ import '../globals.css'
 
 import {Montserrat, Russo_One} from "next/font/google";
 import {Header} from "@/components/shared/admin/header";
+import NextTopLoader from "nextjs-toploader";
+import {RouteGuard} from "@/components/shared/route-guard";
 
 const montserrat = Montserrat({
     subsets: ["latin", "cyrillic"],
@@ -33,10 +35,13 @@ export default function AdminLayout({
             <body
                 className={`${montserrat.variable} ${russoOne.variable} antialiased min-h-screen flex flex-col`}
             >
-                <main >
-                    <Header/>
-                    {children}
-                </main>
+                <NextTopLoader color="#de382b" height={3} showSpinner={false} shadow="0 0 10px #de382b,0 0 5px #de382b" />
+                <RouteGuard requireAuth role="ADMIN">
+                    <main >
+                        <Header/>
+                        {children}
+                    </main>
+                </RouteGuard>
             </body>
         </html>
     );

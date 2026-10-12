@@ -2,6 +2,10 @@ import {create} from "zustand";
 import {api} from "@/lib/api";
 import {toast} from "sonner";
 import {useUserStore} from "@/store/user.store";
+import {isAuthBlockedByCookieConsent} from "@/store/cookie-consent.store";
+
+// Отказ от cookie-файлов блокирует авторизацию и регистрацию на сайте
+const COOKIE_CONSENT_ERROR = "Авторизация недоступна: вы отказались от использования cookie-файлов";
 
 interface AuthStore {
     message: string | null;
@@ -21,6 +25,12 @@ export const useAuthStore = create<AuthStore>((set)=>({
     error: null,
 
     auth: async (name: string, email: string, password: string, passwordRepeat: string) => {
+        if (isAuthBlockedByCookieConsent()) {
+            set({isLoading: false, error: COOKIE_CONSENT_ERROR})
+            toast.error(COOKIE_CONSENT_ERROR)
+            throw new Error(COOKIE_CONSENT_ERROR)
+        }
+
         set({isLoading: true, error: null,})
 
         try {
@@ -43,6 +53,12 @@ export const useAuthStore = create<AuthStore>((set)=>({
     },
 
     login: async (email: string, password: string) => {
+        if (isAuthBlockedByCookieConsent()) {
+            set({isLoading: false, error: COOKIE_CONSENT_ERROR})
+            toast.error(COOKIE_CONSENT_ERROR)
+            throw new Error(COOKIE_CONSENT_ERROR)
+        }
+
         set({isLoading: true, error: null,})
 
         try {

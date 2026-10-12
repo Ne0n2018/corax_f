@@ -6,11 +6,12 @@ import {Button} from "@/components/ui/button";
 import {NavigationMenu, NavigationMenuItem, NavigationMenuList} from "@/components/ui/navigation-menu";
 import {cn} from "@/lib/utils";
 import * as React from "react";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {HamburgerIcon} from "@/components/ui/navbar";
 import {LogOut, MoveUpRight, UserRound} from "lucide-react";
 import {useUserStore} from "@/store/user.store";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 import {NavButton} from "@/components/shared/admin/navButton";
 
 export interface HeaderNavLink {
@@ -38,6 +39,10 @@ export function Header({ navigationLinks = defaultNavigationLinks }: HeaderProps
     const externalUrl = process.env.NEXT_PUBLIC_GRAFANA_URL || '/'
 
     const {user, getMe} = useUserStore()
+    const router = useRouter()
+
+    // Контролируемое меню, чтобы закрывать его при выборе любого пункта
+    const [isMenuOpen, setIsMenuOpen] = useState(false)
 
     useEffect(() => {
         if (!user) {
@@ -45,11 +50,15 @@ export function Header({ navigationLinks = defaultNavigationLinks }: HeaderProps
         }
     }, [user, getMe]);
 
+    const closeMenu = () => setIsMenuOpen(false)
+
+    
+
     return (
         <header>
             <Container className="bg-[#2C2C31]   py-4.5 rounded-[20px]">
                 <div className={'flex justify-between px-5'}>
-                    <Popover>
+                    <Popover open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                         <PopoverTrigger >
                             <Button
                                 className="group p-4.25 bg-[#46464E] rounded-[15px] hover:bg-accent hover:text-accent-foreground"
@@ -75,6 +84,7 @@ export function Header({ navigationLinks = defaultNavigationLinks }: HeaderProps
                                         <NavigationMenuItem className="w-full" key={index}>
                                             <Link
                                                 href={link.href}
+                                                onClick={closeMenu}
                                                 className={cn(
                                                     "flex items-center rounded-md px-7.5 py-4.75 font-medium transition-colors bg-white text-black  cursor-pointer no-underline border border-[#B3B3B3]",
                                                 )}
@@ -86,13 +96,22 @@ export function Header({ navigationLinks = defaultNavigationLinks }: HeaderProps
                                 </NavigationMenuList>
                             </NavigationMenu>
                             <div className={'flex flex-col gap-3.75 mt-5'}>
-                                <Link className={''} href={externalUrl}>
+                                <a
+                                    href={externalUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={closeMenu}
+                                >
                                     <Button className={'px-4.5 py-5.25 w-full rounded-[13px] bg-white text-black border border-[#B3B3B3] justify-start flex gap-3.75 items-center'}><MoveUpRight /> Перейти в Grafana</Button>
-                                </Link>
+                                </a>
 
-                                <Link href={'/'}>
-                                    <Button className={'px-4.5 py-5.25 w-full rounded-[13px] bg-[#D83C2D] flex gap-3.75 justify-start'}><LogOut /> Выйти из аккаунта</Button>
-                                </Link>
+                                <Button
+                                    type="button"
+                                    onClick={()=>{router.push('/')}}
+                                    className={'px-4.5 py-5.25 w-full rounded-[13px] bg-[#D83C2D] flex gap-3.75 justify-start'}
+                                >
+                                    <LogOut /> Выйти из панели администратора
+                                </Button>
                             </div>
                         </PopoverContent>
                     </Popover>

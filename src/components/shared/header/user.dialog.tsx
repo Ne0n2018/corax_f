@@ -33,7 +33,7 @@ export function User({ onSwitchToNotify, onClose }: UserProps) {
         try {
             await logOut()
             onClose()
-        } catch (e) {}
+        } catch {}
     }
     return (
         <>
@@ -60,7 +60,7 @@ export function User({ onSwitchToNotify, onClose }: UserProps) {
                         key={link.href}
                         className="w-full text-black py-4.5 rounded-[13px] border bg-white border-[#B3B3B3] justify-start pl-7.5"
                     >
-                        <Link href={link.href}>
+                        <Link href={link.href} onClick={()=>onClose()}>
                             {link.label}
                         </Link>
                     </Button>
@@ -68,7 +68,7 @@ export function User({ onSwitchToNotify, onClose }: UserProps) {
             </div>
             <div>
                 {user?.role === 'ADMIN' && (
-                    <Link href={'/admin/product'}>
+                    <Link href={'/admin/product'} onClick={()=>onClose()}>
                         <Button className={'px-4.5 py-5.25 w-full justify-start rounded-[13px] mt-6.25'}><ShieldUser /> Войти в панель администратора</Button>
                     </Link>
                 )}

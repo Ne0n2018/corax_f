@@ -9,6 +9,8 @@ import {Suspense} from "react";
 import {PasswordRecoveryDialog} from "@/components/shared/password-recovery/passwordRecovery.dialog";
 import {Footer} from "@/components/shared/footer/footer";
 import {AppLoader} from "@/components/shared/appLoader";
+import {CookieConsentBanner} from "@/components/shared/cookie-consent/cookie-consent";
+import NextTopLoader from "nextjs-toploader";
 
 const montserrat = Montserrat({
     subsets: ["latin", "cyrillic"],
@@ -39,6 +41,7 @@ export default function RootLayout({
       <body
         className={`${montserrat.variable} ${russoOne.variable} antialiased min-h-screen flex flex-col`}
       >
+      <NextTopLoader color="#de382b" height={3} showSpinner={false} shadow="0 0 10px #de382b,0 0 5px #de382b" />
       <main className={'flex-1'}>
           <AppLoader>
               <AuthProvider>
@@ -53,6 +56,7 @@ export default function RootLayout({
           </AppLoader>
       </main>
       <Footer/>
+      <CookieConsentBanner/>
       </body>
     </html>
   );

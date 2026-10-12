@@ -10,12 +10,15 @@ import {AuthDialog, AuthModal} from "@/components/shared/header/auth.dialog"
 import {Container} from "@/components/ui/container"
 import {useUserStore} from "@/store/user.store"
 import Link from "next/link"
+import {usePathname} from "next/navigation"
 import Image from "next/image"
 import {ArrowDown, UserRound} from "lucide-react"
 import {AccountDialog, AccountModal} from "@/components/shared/header/account.dialog"
 import {CartSheet} from "@/components/shared/cart/cart-sheet"
 import {useCartStore} from "@/store/cart.store"
 import useIsMobile from "@/hooks/use-is-mobile"
+import {toast} from "sonner"
+import {isAuthBlockedByCookieConsent, useCookieConsentStore} from "@/store/cookie-consent.store"
 
 // Hamburger icon component
 const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>) => (
@@ -68,11 +71,15 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const defaultNavigationLinks: NavbarNavLink[] = [
-    { href: "/", label: "Главная", active: true },
+    { href: "/", label: "Главная" },
     { href: "/catalog", label: "Каталог" },
     { href: "/about", label: "O нас" },
     { href: "/contacts", label: "Контакты" },
 ]
+
+// Активным считаем пункт, совпадающий с текущим путём (для "/" — строгое совпадение)
+const isLinkActive = (href: string, pathname: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`)
 
 export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     (
@@ -86,6 +93,10 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         const [accountMode, setAccountMode] = useState<AccountModal>(null)
         const [authMode, setAuthMode] = useState<AuthModal>(null)
         const [isCartOpen, setIsCartOpen] = useState(false)
+        // Контролируемое мобильное меню, чтобы закрывать его при выборе пункта
+        const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+        const pathname = usePathname()
 
         const { user } = useUserStore()
         const { isMobile } = useIsMobile()
@@ -98,6 +109,17 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         }, [user, getCart])
 
         const cartTotalItems = cart?.CartItem?.reduce((acc, item) => acc + item.quantity, 0) || 0
+
+        // Отказ от cookie-файлов блокирует вход и регистрацию
+        const handleAuthClick = (mode: AuthModal) => {
+            if (isAuthBlockedByCookieConsent()) {
+                toast.error("Чтобы войти в аккаунт, примите использование cookie-файлов")
+                // Показываем плашку заново, чтобы пользователь мог изменить решение
+                useCookieConsentStore.getState().resetConsent()
+                return
+            }
+            setAuthMode(mode)
+        }
 
         return (
             <header
@@ -113,7 +135,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                         {/* Left side */}
                         <div className="flex items-center gap-2">
                             {isMobile && (
-                                <Popover>
+                                <Popover open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                                     <PopoverTrigger >
                                         <Button
                                             className="group h-9 w-9 hover:bg-accent hover:text-accent-foreground"
@@ -130,9 +152,10 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                                                     <NavigationMenuItem className="w-full" key={index}>
                                                         <Link
                                                             href={link.href}
+                                                            onClick={() => setIsMobileMenuOpen(false)}
                                                             className={cn(
                                                                 "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer no-underline",
-                                                                link.active
+                                                                isLinkActive(link.href, pathname)
                                                                     ? "bg-accent text-accent-foreground"
                                                                     : "text-foreground/80",
                                                             )}
@@ -175,17 +198,17 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                                         <NavigationMenuList className="gap-2">
                                             {navigationLinks.map((link, index) => (
                                                 <NavigationMenuItem key={index}>
-                                                    <a
+                                                    <Link
                                                         href={link.href}
                                                         className={cn(
                                                             "group inline-flex h-9 w-max items-center justify-center px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer no-underline",
-                                                            link.active
+                                                            isLinkActive(link.href, pathname)
                                                                 ? "text-[#FFFFFF8C]"
                                                                 : "text-white hover:text-[#FFFFFF8C]",
                                                         )}
                                                     >
                                                         {link.label}
-                                                    </a>
+                                                    </Link>
                                                 </NavigationMenuItem>
                                             ))}
                                         </NavigationMenuList>
@@ -221,7 +244,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                             ) : isMobile ? (
                                 <Button
                                     className="bg-[#4C4C55] text-white text-[12px] py-4.25 px-7.25 rounded-[13px] hover:bg-gray-100"
-                                    onClick={() => setAuthMode("Login")}
+                                    onClick={() => handleAuthClick("Login")}
                                 >
                                     Войти
                                 </Button>
@@ -229,13 +252,13 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                                 <div className="flex items-center gap-3">
                                     <Button
                                         className="text-black bg-white py-4.25 px-7.25 rounded-[13px] hover:bg-gray-100"
-                                        onClick={() => setAuthMode("Login")}
+                                        onClick={() => handleAuthClick("Login")}
                                     >
                                         Войти
                                     </Button>
                                     <Button
                                         className="py-4 px-5.5 bg-[#38383D] rounded-[13px] text-[13px] hover:bg-[#4a4a50]"
-                                        onClick={() => setAuthMode("Register")}
+                                        onClick={() => handleAuthClick("Register")}
                                     >
                                         Зарегистрироваться
                                     </Button>

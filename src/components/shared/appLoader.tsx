@@ -2,23 +2,32 @@
 
 import React, {useEffect,} from "react";
 import {useUserStore} from "@/store/user.store";
-import useIsMounted from "@/hooks/use-is-mounted";
+import {useTopLoader} from "nextjs-toploader";
 
 export function AppLoader({ children }: { children: React.ReactNode }) {
-    const { getMe, isLoading } = useUserStore();
-   const isMounted = useIsMounted()
+    const getMe = useUserStore((state) => state.getMe);
+    const isLoading = useUserStore((state) => state.isLoading);
+
+    // Методы прогресс-бара стабильны, поэтому их можно безопасно указывать в зависимостях
+    const {start, done} = useTopLoader();
 
     useEffect(() => {
         getMe();
-    }, []);
+    }, [getMe]);
 
-    // Показываем лоадер, пока клиент не смонтирован или идет запрос за профилем
-    if (!isMounted || isLoading) {
-        return (
-            <div className="min-h-screen w-full flex items-center justify-center bg-[#1E1E24]">
-                <span className="text-white text-lg font-russo animate-pulse">Загрузка...</span>
-            </div>
-        );
+    // Пока грузится профиль — вместо экрана загрузки показываем прогресс-бар
+    useEffect(() => {
+        if (isLoading) {
+            start();
+        } else {
+            done();
+        }
+    }, [isLoading, start, done]);
+
+    // Прогресс-бар рисует сам NextTopLoader, поэтому вместо экрана загрузки
+    // оставляем пустой контейнер на всю высоту (чтобы футер не «прыгал»)
+    if (isLoading) {
+        return <div className="min-h-screen w-full" />;
     }
 
     // Когда всё готово, рендерим само приложение

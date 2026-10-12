@@ -44,6 +44,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_SERVER_URL=https://corax.by/api
             NEXT_PUBLIC_DADATA_API_KEY=${{ secrets.NEXT_PUBLIC_DADATA_API_KEY }}
+            NEXT_PUBLIC_GRAFANA_URL=${{ secrets.NEXT_PUBLIC_GRAFANA_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { Container } from '@/components/ui/container'
 import useIsMobile from '@/hooks/use-is-mobile'
 import { cn } from '@/lib/utils'
+import { RouteGuard } from '@/components/shared/route-guard'
 
 export default function AccountLayout({
     children,
@@ -18,18 +19,20 @@ export default function AccountLayout({
     const { logOut, isLoading } = useAuthStore()
 
     return (
-        <Container className={cn(!isMobile ? 'flex gap-3 my-3.75 items-start' : 'my-3.75')}>
-            {!isMobile && (
-                <LeftSide
-                    user={user}
-                    isLoading={isLoading}
-                    logOut={logOut}
-                    className="w-109.25 shrink-0"
-                />
-            )}
-            <div className="flex-1 min-w-0">
-                {children}
-            </div>
-        </Container>
+        <RouteGuard requireAuth>
+            <Container className={cn(!isMobile ? 'flex gap-3 my-3.75 items-start' : 'my-3.75')}>
+                {!isMobile && (
+                    <LeftSide
+                        user={user}
+                        isLoading={isLoading}
+                        logOut={logOut}
+                        className="w-109.25 shrink-0"
+                    />
+                )}
+                <div className="flex-1 min-w-0">
+                    {children}
+                </div>
+            </Container>
+        </RouteGuard>
     )
 }

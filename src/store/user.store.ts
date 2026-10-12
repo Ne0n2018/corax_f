@@ -2,6 +2,7 @@ import {api} from "@/lib/api";
 import {create} from "zustand/react";
 import {toast} from "sonner";
 import {GetUsersParams, Roles, User, UserAdmin, UserMeta} from "@/types/user";
+import {useCookieConsentStore} from "@/store/cookie-consent.store";
 
 
 interface UserState {
@@ -33,10 +34,16 @@ export const useUserStore = create<UserState>((set, get) => ({
     params: { page: 1, limit: 10, search: "", sortBy: "createdAt" },
 
     getMe: async () => {
+        // При отказе от cookie-файлов авторизация заблокирована — профиль не запрашиваем
+        if (useCookieConsentStore.getState().consent === "rejected") {
+            set({ user: null, isAuth: false, isLoading: false });
+            return;
+        }
+
         try {
             const response = await api.get<User>('/users/profile');
             set({ user: response.data, isAuth: true, isLoading: false });
-        } catch (error) {
+        } catch {
             set({ user: null, isAuth: false, isLoading: false });
         }
     },
