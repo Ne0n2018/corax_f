@@ -2,6 +2,7 @@
 import {cn} from "@/lib/utils";
 import {Button} from "@/components/ui/button";
 import Image from "next/image";
+import {CallbackDialog} from "@/components/shared/callback/callback.dialog";
 
 interface FirstSectionProps {
     isAuthenticated: boolean;
@@ -51,9 +52,13 @@ export function FirstSection({ isAuthenticated }: FirstSectionProps) {
                 <p className="font-mono text-[12px] md:text-sm text-[#737373] mb-6">
                     Интернет-магазин спортивного питания для роста мышц, силы и выносливости.
                 </p>
-                <Button className="bg-[#D83C2D] hover:bg-[#c23325] text-white rounded-[13px] px-8 py-3.5 transition-colors cursor-pointer">
-                    Заказать звонок
-                </Button>
+                <CallbackDialog
+                    trigger={
+                        <Button className="bg-[#D83C2D] hover:bg-[#c23325] text-white rounded-[13px] px-8 py-3.5 transition-colors cursor-pointer">
+                            Заказать звонок
+                        </Button>
+                    }
+                />
             </div>
 
             {/* Изображение справа */}

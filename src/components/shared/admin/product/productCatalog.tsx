@@ -26,11 +26,7 @@ export function ProductCatalog() {
     // Делаем запрос каждый раз, когда меняется отложенное значение поиска
     useEffect(() => {
         adminGet(debouncedSearch, false);
-    }, [debouncedSearch]);
-
-   useEffect(()=>{
-       adminGet(debouncedSearch, false);
-   }, [debouncedSearch]);
+    }, [debouncedSearch, adminGet]);
 
    const lastElementRef = useCallback((node: HTMLDivElement)=>{
        if (isLoading || isFetchingMore) return ;

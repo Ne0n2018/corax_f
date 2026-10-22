@@ -7,6 +7,7 @@ import {Button} from "@/components/ui/button";
 import {Container} from "@/components/ui/container";
 import {useCookieConsentStore} from "@/store/cookie-consent.store";
 import {useUserStore} from "@/store/user.store";
+import {PRIVACY_POLICY_URL} from "@/lib/constants";
 
 // Пустая подписка — нужна только чтобы отличить сервер от клиента
 const emptySubscribe = () => () => {};
@@ -51,8 +52,13 @@ export function CookieConsentBanner() {
                             Мы используем cookie-файлы, чтобы сайт работал корректно, а также для
                             авторизации и улучшения сервиса. Продолжая пользоваться сайтом, вы
                             соглашаетесь с{" "}
-                            <Link href="/" className="underline hover:text-white">
-                                политикой конфиденциальности
+                            <Link
+                                href={PRIVACY_POLICY_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline hover:text-white"
+                            >
+                                политикой об обработке персональных данных
                             </Link>
                             .
                         </p>

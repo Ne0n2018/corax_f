@@ -11,6 +11,8 @@ import {Field, FieldGroup, FieldLabel} from "@/components/ui/field";
 import Image from "next/image";
 import {registerSchema} from "@/schemas/register.schema";
 import {useAuthStore} from "@/store/auth.store";
+import {PRIVACY_POLICY_URL} from "@/lib/constants";
+import Link from "next/link";
 import * as React from "react";
 import {useEffect} from "react";
 
@@ -129,7 +131,17 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
                                     )}
                                 />
                                 <FieldLabel className='text-black'>
-                                    Я даю согласие на обработку моих персональных данных с целью создания и использования личного кабинета и подтверждаю, что до дачи согласия ознакомилась с информацией об обработке данных.
+                                    Я даю согласие на обработку моих персональных данных с целью создания и использования личного кабинета и подтверждаю, что до дачи согласия ознакомилась с{" "}
+                                    <Link
+                                        href={PRIVACY_POLICY_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(event) => event.stopPropagation()}
+                                        className="font-medium text-[#EC5B4D] underline underline-offset-2 hover:text-[#D83C2D]"
+                                    >
+                                        политикой об обработке персональных данных
+                                    </Link>
+                                    .
                                 </FieldLabel>
                             </Field>
                             {errors.consent && <span className="text-red-500 text-sm">{errors.consent.message}</span>}

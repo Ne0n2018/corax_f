@@ -9,6 +9,7 @@ import {useProductStore} from "@/store/product.store"
 import {useCartStore} from '@/store/cart.store'
 import {ProductOption} from "@/types/products"
 import {AddToCart} from "@/types/cart"
+import { useRouter } from 'next/navigation'
 
 interface ProductDetailModalProps {
     productId: string
@@ -18,6 +19,7 @@ interface ProductDetailModalProps {
 }
 
 export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct }: ProductDetailModalProps) {
+    const router = useRouter()
     const [quantity, setQuantity] = useState(1)
     const [isExpanded, setIsExpanded] = useState(false)
     const [selectedSize, setSelectedSize] = useState<ProductOption | null>(null)
@@ -46,17 +48,17 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
     }, [productId, getCurrentProduct])
 
     // 2. Отправляем айди подкатегории товара для получения похожих товаров
-    useEffect(() => {
-        const subcategoryId =
-            currentUserProduct?.subCategoryId ||
-            (currentUserProduct as any)?.subCategory?.id ||
-            (currentUserProduct as any)?.sub_category_id ||
-            (currentUserProduct as any)?.subCategory;
+    const subcategoryId =
+        currentUserProduct?.subCategoryId ||
+        (currentUserProduct as any)?.subCategory?.id ||
+        (currentUserProduct as any)?.sub_category_id ||
+        (currentUserProduct as any)?.subCategory;
 
+    useEffect(() => {
         if (subcategoryId !== undefined && subcategoryId !== null && String(subcategoryId).trim() !== '') {
             getSimilarProducts(String(subcategoryId));
         }
-    }, [currentUserProduct, getSimilarProducts]);
+    }, [subcategoryId, getSimilarProducts]);
 
     // 3. Сбрасываем скролл, счетчик, состояние описания и выбранные вариации при смене текущего товара
     useEffect(() => {
@@ -99,11 +101,13 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
         }
     }
 
-    // Обработчик клика по похожему товару
+    // Обработчик клика по похожему товару:
+    // товар загрузит эффект выше по изменению productId
     const handleSelectSimilarProduct = (newProductId: string) => {
-        getCurrentProduct(newProductId)
         if (onSelectProduct) {
             onSelectProduct(newProductId)
+        } else {
+            getCurrentProduct(newProductId)
         }
     }
 
@@ -132,6 +136,13 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
     const unitPrice = Number(currentUserProduct?.defaultPrice || 0) + sizeExtra + tasteExtra
     const totalPrice = unitPrice * quantity
     const tasteLabel = currentUserProduct?.isClothes ? 'Цвет' : 'Вкус'
+
+    // Переход сразу к оформлению заказа.
+    // Окно закроется само: на /cart параллельный слот @modal отдаёт default.tsx (null).
+    // Вызывать onClose() (router.back()) здесь нельзя — back отменяет push.
+    const handleBuyNow = () => {
+        router.push('/cart')
+    }
 
     // Добавление в корзину (отправляем столько раз, сколько выбрано единиц товара)
     const handleAddToCart = async () => {
@@ -334,6 +345,7 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
 
                             <button
                                 type="button"
+                                onClick={handleBuyNow}
                                 className="flex-1 min-w-35 bg-[#D83C2D] hover:bg-[#c23325] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl transition-colors text-center"
                             >
                                 Приобрести товар

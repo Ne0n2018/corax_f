@@ -7,6 +7,8 @@ import {Button} from "@/components/ui/button";
 import {useUserStore} from "@/store/user.store";
 import Link from "next/link";
 import {useAuthStore} from "@/store/auth.store";
+import {useNotificationStore} from "@/store/notification.store";
+import {NotificationBadge} from "@/components/shared/notification-badge";
 
 interface UserProps {
     onSwitchToNotify: () => void;
@@ -28,6 +30,7 @@ const navLinks: NavLink[] = [
 export function User({ onSwitchToNotify, onClose }: UserProps) {
     const {user} = useUserStore()
     const {logOut, isLoading} = useAuthStore()
+    const unread = useNotificationStore((state) => state.unread)
 
     const onClick = async () => {
         try {
@@ -48,7 +51,10 @@ export function User({ onSwitchToNotify, onClose }: UserProps) {
                     </Link>
                 </div>
                 <div>
-                    <Button  variant="outline" className={'bg-white text-black border border-black rounded-[15px] p-3'} onClick={()=>onSwitchToNotify()}><Bell /></Button>
+                    <Button  variant="outline" className={'relative overflow-visible bg-white text-black border border-black rounded-[15px] p-3'} onClick={()=>onSwitchToNotify()} aria-label="Уведомления">
+                        <Bell />
+                        <NotificationBadge count={unread} ringColor="#ffffff" />
+                    </Button>
                 </div>
                 <DialogClose className={"text-black absolute bg-white p-4.5 rounded-[20px] -left-18 top-2 hover:bg-[#4C4C55] hover:text-white"}>
                     <X />

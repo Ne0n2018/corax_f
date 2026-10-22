@@ -36,7 +36,7 @@ export function Contacts() {
                 <div>
                     <h3 className="text-xl font-semibold mb-1 sm:mb-2">Номер телефона (МТС)</h3>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                        <p className="font-semibold text-sm ">+375 (00) 000 00 00</p>
+                        <p className="font-semibold text-sm ">+375 (29) 535 2079</p>
                         <p className="font-semibold text-sm ">Эдгар Викторович</p>
                     </div>
                 </div>

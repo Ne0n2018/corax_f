@@ -17,11 +17,16 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
     const { isLoading: favoriteLoading, addToFavorite, getFavorite, deleteFavorite, favoriteProductId } = useFavoriteStore();
     const observerTarget = useRef<HTMLDivElement | null>(null);
 
-    // 1. Передаем параметры поиска при монтировании и изменении фильтров
+    // 1. Загружаем товары при монтировании и изменении фильтров.
+    // Параметры берутся из URL, поэтому фильтр не дублирует запрос напрямую.
     useEffect(() => {
         getForCatalog({ name: currentSearch, subCategoryId: currentSubCategoryId });
+    }, [getForCatalog, currentSearch, currentSubCategoryId]);
+
+    // Избранное не зависит от фильтров каталога — грузим отдельно
+    useEffect(() => {
         getFavorite();
-    }, [getForCatalog, getFavorite, currentSearch, currentSubCategoryId]);
+    }, [getFavorite]);
 
     // 2. Настройка бесконечной загрузки
     useEffect(() => {

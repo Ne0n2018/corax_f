@@ -6,12 +6,12 @@ import {Search} from "lucide-react";
 import {useUserStore} from "@/store/user.store";
 
 export function UserSearch() {
-    const { params, setParams, getUsers } = useUserStore();
+    const { params, setParams } = useUserStore();
     const [searchValue, setSearchValue] = useState(params.search || "");
 
+    // Список перезапрашивает UserManagement по изменению params — без дублей
     const handleSearch = () => {
         setParams({ search: searchValue, page: 1 });
-        getUsers();
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

@@ -6,7 +6,7 @@ import {Button} from "@/components/ui/button";
 import {NavigationMenu, NavigationMenuItem, NavigationMenuList} from "@/components/ui/navigation-menu";
 import {cn} from "@/lib/utils";
 import * as React from "react";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {HamburgerIcon} from "@/components/ui/navbar";
 import {LogOut, MoveUpRight, UserRound} from "lucide-react";
 import {useUserStore} from "@/store/user.store";
@@ -38,17 +38,14 @@ export function Header({ navigationLinks = defaultNavigationLinks }: HeaderProps
 
     const externalUrl = process.env.NEXT_PUBLIC_GRAFANA_URL || '/'
 
-    const {user, getMe} = useUserStore()
+    const {user} = useUserStore()
     const router = useRouter()
 
     // Контролируемое меню, чтобы закрывать его при выборе любого пункта
     const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-    useEffect(() => {
-        if (!user) {
-            getMe();
-        }
-    }, [user, getMe]);
+    // Профиль уже загружает RouteGuard (он оборачивает этот хедер),
+    // поэтому отдельный getMe здесь не нужен
 
     const closeMenu = () => setIsMenuOpen(false)
 

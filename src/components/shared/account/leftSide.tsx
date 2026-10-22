@@ -7,12 +7,16 @@ import {Button} from "@/components/ui/button";
 import React from "react";
 import {cn} from "@/lib/utils";
 import {User} from "@/types/user";
+import {useNotificationStore} from "@/store/notification.store";
+import {NotificationBadge} from "@/components/shared/notification-badge";
 
 interface LeftSideProps {
     user: User | null;
     isLoading: boolean;
     logOut: () => void;
     className?: string;
+    onNotificationsClick: () => void;
+    isNotificationsOpen: boolean;
 }
 
 interface NavLink {
@@ -27,8 +31,9 @@ const navLinks: NavLink[] = [
     { href: '/account/purchases', label: 'Ваши покупки' },
 ]
 
-export function LeftSide({ user, isLoading, logOut, className }: LeftSideProps) {
+export function LeftSide({ user, isLoading, logOut, className, onNotificationsClick, isNotificationsOpen }: LeftSideProps) {
     const pathname = usePathname()
+    const unread = useNotificationStore((state) => state.unread)
 
     return (
         <div className={cn('bg-white rounded-[20px] p-8 sm:p-9.75 border border-gray-100 shadow-2xs flex flex-col justify-between', className)}>
@@ -57,9 +62,18 @@ export function LeftSide({ user, isLoading, logOut, className }: LeftSideProps) 
                     <div>
                         <Button
                             variant="outline"
-                            className="bg-white text-black border border-black rounded-[15px] p-2.5 h-auto hover:bg-gray-50"
+                            className={cn(
+                                'relative overflow-visible rounded-[15px] p-2.5 h-auto transition-colors cursor-pointer',
+                                isNotificationsOpen
+                                    ? 'bg-[#2C2C31] text-white border-[#2C2C31] hover:bg-[#38383E] hover:text-white'
+                                    : 'bg-white text-black border-black hover:bg-gray-50'
+                            )}
+                            onClick={onNotificationsClick}
+                            aria-label="Уведомления"
+                            title="Уведомления"
                         >
                             <Bell className="w-4 h-4" />
+                            <NotificationBadge count={unread} ringColor={isNotificationsOpen ? '#2C2C31' : '#ffffff'} />
                         </Button>
                     </div>
                 </div>

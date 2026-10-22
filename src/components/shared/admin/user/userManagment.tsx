@@ -8,11 +8,12 @@ import {UserSearch} from "@/components/shared/admin/user/userSearch";
 import {UserItem} from "@/components/shared/admin/user/useritem";
 
 export function UserManagement() {
-    const { users, meta, isLoading, getUsers, params, setParams, blockUser, unBlockUser } = useUserStore();
+    const { users, meta, isLoading, getUsers, params, setParams } = useUserStore();
 
+    // Запрос уходит только при реальном изменении параметров списка
     useEffect(() => {
         getUsers();
-    }, [params.page,blockUser, unBlockUser]);
+    }, [params.page, params.search, params.sortBy, getUsers]);
 
     return (
         <div className="flex flex-col gap-6 p-4 ">

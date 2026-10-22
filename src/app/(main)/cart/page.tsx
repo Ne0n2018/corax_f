@@ -17,7 +17,7 @@ import {toast} from 'sonner'
 
 export default function CartCheckoutPage() {
     const { cart, isLoading: isCartLoading, getCart, updateQuantity } = useCartStore()
-    const { user, getMe, updateMe } = useUserStore()
+    const { user, updateMe } = useUserStore()
     const { createOrder, isSubmitting } = useOrderStore()
 
     // Состояния выбранных позиций (по умолчанию выбраны все товары из корзины)
@@ -33,11 +33,10 @@ export default function CartCheckoutPage() {
     const [isOrderCompleted, setIsOrderCompleted] = useState<boolean>(false)
     const [completedOrderId, setCompletedOrderId] = useState<string>('')
 
-    // Загрузка корзины и профиля пользователя при монтировании
+    // Загрузка корзины при монтировании (профиль уже загружен AppLoader)
     useEffect(() => {
         getCart()
-        getMe()
-    }, [getCart, getMe])
+    }, [getCart])
 
     // Инициализация выбранных элементов
     useEffect(() => {

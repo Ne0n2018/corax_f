@@ -8,7 +8,8 @@ import {ProductSearchFilter} from "@/components/shared/productCatalog/productSea
 export default function Page() {
     const searchParams = useSearchParams();
 
-    const currentSearch = searchParams.get("search") || "";
+    // Фильтр пишет параметр name, старые ссылки могут содержать search
+    const currentSearch = searchParams.get("name") || searchParams.get("search") || "";
     const currentSubCategoryId = searchParams.get("subCategoryId") || undefined;
 
     return (

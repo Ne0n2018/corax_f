@@ -29,15 +29,20 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
     const { favoriteProductId, addToFavorite, deleteFavorite, getFavorite } = useFavoriteStore()
     const { comparisonProductIds, toggleComparison, getComparison } = useComparisonStore()
 
-    const [selectedItemIds, setSelectedItemIds] = useState<string[]>([])
     // ID товара в корзине, для которого открыто доп. меню с тремя точками
     const [activeMenuCartItemId, setActiveMenuCartItemId] = useState<string | null>(null)
     const router = useRouter()
 
-    // Загрузка корзины, избранного и сравнения при открытии
+    // Загрузка корзины при каждом открытии (она меняется),
+    // избранное и сравнение — только один раз, они уже подгружаются в других разделах
+    const relatedLoadedRef = React.useRef(false)
     useEffect(() => {
-        if (isOpen) {
-            getCart()
+        if (!isOpen) return
+
+        getCart()
+
+        if (!relatedLoadedRef.current) {
+            relatedLoadedRef.current = true
             getFavorite()
             getComparison()
         }
@@ -45,17 +50,8 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
 
     const items = cart?.CartItem || []
 
-    // По умолчанию выбираем все позиции корзины
-useEffect(() => {
-    if (cart?.CartItem && cart.CartItem.length > 0) {
-        setSelectedItemIds(cart.CartItem.map((i) => i.id))
-    } else {
-        setSelectedItemIds([])
-    }
-}, [cart?.CartItem]) // Зависимость только от реального массива из стора
-
-
-    const selectedItems = items.filter((item) => selectedItemIds.includes(item.id))
+    // В шторке нет выбора отдельных позиций — в заказ идут все товары корзины
+    const selectedItems = items
     const selectedTotalAmount = selectedItems.reduce(
         (acc, item) => acc + item.productItem.price * item.quantity,
         0

@@ -19,6 +19,8 @@ import {useCartStore} from "@/store/cart.store"
 import useIsMobile from "@/hooks/use-is-mobile"
 import {toast} from "sonner"
 import {isAuthBlockedByCookieConsent, useCookieConsentStore} from "@/store/cookie-consent.store"
+import {useNotificationStore} from "@/store/notification.store"
+import {NotificationBadge} from "@/components/shared/notification-badge"
 
 // Hamburger icon component
 const HamburgerIcon = ({ className, ...props }: React.SVGAttributes<SVGElement>) => (
@@ -101,6 +103,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         const { user } = useUserStore()
         const { isMobile } = useIsMobile()
         const { cart, getCart } = useCartStore()
+        const unread = useNotificationStore((state) => state.unread)
 
         React.useEffect(() => {
             if (user) {
@@ -235,10 +238,12 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                                         )}
                                     </Button>
                                     <Button
-                                        className="p-2.5 bg-[#46464E] rounded-xl"
+                                        className="relative overflow-visible p-2.5 bg-[#46464E] rounded-xl"
                                         onClick={() => setAccountMode("account")}
+                                        aria-label="Меню аккаунта"
                                     >
                                         <UserRound />
+                                        <NotificationBadge count={unread} />
                                     </Button>
                                 </div>
                             ) : isMobile ? (

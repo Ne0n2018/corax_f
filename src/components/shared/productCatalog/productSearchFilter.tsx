@@ -2,7 +2,6 @@
 import {useEffect, useState} from "react";
 import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useCategoryStore} from "@/store/category.store";
-import {useProductStore} from "@/store/product.store";
 import {ChevronDown, ChevronUp} from "lucide-react";
 
 export function ProductSearchFilter() {
@@ -18,7 +17,6 @@ export function ProductSearchFilter() {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { categories, fetchCategories } = useCategoryStore();
-    const { getForCatalog } = useProductStore();
 
     useEffect(() => {
         fetchCategories();
@@ -48,13 +46,11 @@ export function ProductSearchFilter() {
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
+    // Данные каталога перезапрашивает Catalog по изменению URL,
+    // поэтому здесь достаточно обновить query-параметры
     const handleSearch = () => {
         const cleanSearch = searchQuery.trim();
         updateQueryParams(cleanSearch, selectedSubCategoryId);
-        getForCatalog({
-            name: cleanSearch,
-            subCategoryId: selectedSubCategoryId || undefined,
-        });
     };
 
     const handleSubCategorySelect = (subCategoryId: string) => {
@@ -62,10 +58,6 @@ export function ProductSearchFilter() {
         setSelectedSubCategoryId(nextSubCategoryId);
 
         updateQueryParams(searchQuery, nextSubCategoryId);
-        getForCatalog({
-            name: searchQuery.trim(),
-            subCategoryId: nextSubCategoryId || undefined,
-        });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

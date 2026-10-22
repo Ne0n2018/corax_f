@@ -6,6 +6,8 @@ import {Button} from "@/components/ui/button";
 import {Skeleton} from "@/components/ui/skeleton";
 import * as React from "react";
 import useIsMobile from "@/hooks/use-is-mobile";
+import {CallbackDialog} from "@/components/shared/callback/callback.dialog";
+import {PRIVACY_POLICY_URL} from "@/lib/constants";
 
 
 export function Footer () {
@@ -63,18 +65,29 @@ export function Footer () {
                            <h2 className={'text-xl font-bold'}>Контакты</h2>
                            <p className={"text-xs"}>Адрес: ул. Братская 14 Спортивный зал Адреналин</p>
                            <p className={"text-xs"}>Email: <Link href={'mailto:info@gmail.com'} target={"_blank"}>info@gmail.com</Link></p>
-                           <p className={"text-xs"}>Номер телефона: +375 (00) 000 00 00</p>
-                           <Button className={'px-6.25 py-3.75 rounded-[13px] text-sm'}>Заказать звонок</Button>
+                           <p className={"text-xs"}>Номер телефона: +375 (29) 535 2079</p>
+                            <CallbackDialog
+                                trigger={
+                                    <Button className={'px-6.25 py-3.75 rounded-[13px] text-sm'}>Заказать звонок</Button>
+                                }
+                            />
                        </div>
                        <div className={'flex flex-col gap-2 mt-3.75'}>
                            <h2 className={'font-bold text-xl text-center'}>Режим работы</h2>
                            <p className={'text-[14px] text-center'}>Понедельник - пятница: 10:00-23:00</p>
                            <p className={'text-[14px] text-center'}>Суббота - воскресенье: 9:00 - 21:00</p>
                        </div>
-                       <div className={'border border-white w-82.75 mx-auto mt-5'}/>
-                       <div className={"flex justify-center mt-3.75"}>
-                           <Link href={'/'} className={'text-[12px]'}>Политика конфеденциальности</Link>
-                       </div>
+                        <div className={'border border-white w-82.75 mx-auto mt-5'}/>
+                        <div className={"flex justify-center mt-3.75"}>
+                            <Link
+                                href={PRIVACY_POLICY_URL}
+                                target={'_blank'}
+                                rel={'noopener noreferrer'}
+                                className={'text-[12px] text-white/70 underline underline-offset-2 hover:text-white'}
+                            >
+                                Политика об обработке персональных данных
+                            </Link>
+                        </div>
                    </div>
 
                </>
@@ -129,17 +142,25 @@ export function Footer () {
                             <p className={"text-[16px]"}>Email: <Link href={'mailto:info@gmail.com'}
                                                                       target={"_blank"}>info@gmail.com</Link></p>
                             <p className={"text-[16px]"}>Номер телефона:<br/>
-                                +375 (00) 000 00 00</p>
-                            <Button className={'px-6.25 py-3.75 rounded-[13px] text-[14px]'}>Заказать звонок</Button>
+                                +375 (29) 535 2079</p>
+                            <CallbackDialog
+                                trigger={
+                                    <Button className={'px-6.25 py-3.75 rounded-[13px] text-[14px]'}>Заказать звонок</Button>
+                                }
+                            />
                         </div>
                     </div>
                     <div className={'w-300  mx-auto border border-solid border-white'}/>
-                    <div className={'flex flex-row justify-around mt-7.5 mb-9.25'}>
-                        <p>Доставка по всему Минску </p>
-                        <div/>
-                        <div/>
-                        <div/>
-                        <p>Политика конфеденциальности</p>
+                    <div className={'flex flex-col items-center gap-2 mt-7.5 mb-9.25'}>
+                        <p className={'text-[16px]'}>Доставка по всему Минску</p>
+                        <Link
+                            href={PRIVACY_POLICY_URL}
+                            target={'_blank'}
+                            rel={'noopener noreferrer'}
+                            className={'text-[14px] text-white/70 underline underline-offset-2 hover:text-white'}
+                        >
+                            Политика об обработке персональных данных
+                        </Link>
                     </div>
                 </>
             )}
