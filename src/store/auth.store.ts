@@ -3,6 +3,7 @@ import {api} from "@/lib/api";
 import {toast} from "sonner";
 import {useUserStore} from "@/store/user.store";
 import {isAuthBlockedByCookieConsent} from "@/store/cookie-consent.store";
+import {OAuthConnectResponse, OAuthProvider} from "@/types/auth";
 
 // Отказ от cookie-файлов блокирует авторизацию и регистрацию на сайте
 const COOKIE_CONSENT_ERROR = "Авторизация недоступна: вы отказались от использования cookie-файлов";
@@ -13,6 +14,7 @@ interface AuthStore {
     error: string | null;
     auth: (name: string, email: string, password: string, passwordRepeat: string) => Promise<void>;
     login: ( email: string, password: string) => Promise<void>;
+    loginWithOAuth: (provider: OAuthProvider) => Promise<void>;
     passwordRecovery: ( email: string) => Promise<void>;
     newPassword: (token: string, password: string) => Promise<void>;
     emailConfirm: ( token: string ) => Promise<void>;
@@ -77,6 +79,31 @@ export const useAuthStore = create<AuthStore>((set)=>({
                 toast.error(error.response?.data?.message)
             }
             throw error;
+        }
+    },
+
+    loginWithOAuth: async (provider: OAuthProvider) => {
+        if (isAuthBlockedByCookieConsent()) {
+            set({isLoading: false, error: COOKIE_CONSENT_ERROR})
+            toast.error(COOKIE_CONSENT_ERROR)
+            throw new Error(COOKIE_CONSENT_ERROR)
+        }
+
+        // Глобальный isLoading не трогаем: при успехе страница уходит на провайдера,
+        // а локальное состояние кнопок живёт в диалоге входа
+        set({error: null})
+
+        try {
+            // Бэкенд возвращает готовую ссылку с redirect_uri и scope
+            const response = await api.get<OAuthConnectResponse>(`/auth/oauth/connect/${provider}`)
+
+            // Нужен полный переход браузера, чтобы пользователь увидел экран согласия провайдера
+            window.location.href = response.data.url
+        } catch (error: any) {
+            const message = error.response?.data?.message || 'Не удалось начать вход. Попробуйте ещё раз.'
+            set({error: message})
+            toast.error(message)
+            throw error
         }
     },
 

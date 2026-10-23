@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import Image from "next/image";
 import {z} from "zod";
 import {useForm} from "react-hook-form";
@@ -10,6 +10,7 @@ import {useAuthStore} from "@/store/auth.store";
 import {DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import {OAuthProvider} from "@/types/auth";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -40,13 +41,24 @@ export function Login({ onSwitchToRegister, onSwitchToRecovery, onClose, isOpen 
         }
     }, [isOpen, reset]);
 
-    const { login, isLoading } = useAuthStore();
+    const { login, loginWithOAuth, isLoading } = useAuthStore();
+    const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
 
     const onSubmit = async (data: LoginFormValues) => {
         try {
             await login(data.email, data.password);
             onClose();
         } catch (error) {}
+    };
+
+    const onOAuthLogin = async (provider: OAuthProvider) => {
+        setOauthProvider(provider);
+        try {
+            // При успехе браузер уходит на страницу провайдера, состояние не сбрасываем
+            await loginWithOAuth(provider);
+        } catch {
+            setOauthProvider(null);
+        }
     };
 
     const isPending = isLoading || isSubmitting;
@@ -130,11 +142,21 @@ export function Login({ onSwitchToRegister, onSwitchToRecovery, onClose, isOpen 
                 >
                     Зарегистрироваться
                 </Button>
-                <Button className="py-4 md:py-6 mb-3 rounded-[13px]" disabled={isPending}>
-                    Войти с помощью Google
+                <Button
+                    type="button"
+                    className="py-4 md:py-6 mb-3 rounded-[13px]"
+                    disabled={isPending || oauthProvider !== null}
+                    onClick={() => onOAuthLogin('google')}
+                >
+                    {oauthProvider === 'google' ? 'Переход…' : 'Войти с помощью Google'}
                 </Button>
-                <Button className="py-4 md:py-6 mb-2 rounded-[13px]" disabled={isPending}>
-                    Войти с помощью Яндекс
+                <Button
+                    type="button"
+                    className="py-4 md:py-6 mb-2 rounded-[13px]"
+                    disabled={isPending || oauthProvider !== null}
+                    onClick={() => onOAuthLogin('yandex')}
+                >
+                    {oauthProvider === 'yandex' ? 'Переход…' : 'Войти с помощью Яндекс'}
                 </Button>
             </div>
         </>
