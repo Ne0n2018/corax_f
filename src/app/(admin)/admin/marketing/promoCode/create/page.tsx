@@ -1,8 +1,13 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {MoveLeft} from "lucide-react";
 import {PromoForm} from "@/components/shared/admin/promo/promoForm";
+
+export const metadata: Metadata = {
+    title: "Создание промокода — Панель администратора",
+};
 
 
 export default function Page () {

@@ -1,5 +1,10 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {CategoryForm} from "@/components/shared/admin/category/categoryForm";
+
+export const metadata: Metadata = {
+    title: "Создание категории — Панель администратора",
+};
 
 export default function Page () {
     return (

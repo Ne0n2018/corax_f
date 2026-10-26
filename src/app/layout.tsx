@@ -20,6 +20,9 @@ const russoOne = Russo_One({
 export const metadata: Metadata = {
     title: "Corax",
     description: "Corax — магазин спортивного питания",
+    icons: {
+        icon: [{url: "/icon.svg", type: "image/svg+xml"}],
+    },
 };
 
 export default function RootLayout({

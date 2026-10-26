@@ -1,3 +1,4 @@
+import type {Metadata} from "next";
 import {Navbar} from "@/components/ui/navbar";
 import {Toaster} from "sonner";
 import {AuthProvider} from "@/providers/auth.provider";
@@ -6,6 +7,12 @@ import {PasswordRecoveryDialog} from "@/components/shared/password-recovery/pass
 import {Footer} from "@/components/shared/footer/footer";
 import {AppLoader} from "@/components/shared/appLoader";
 import {CookieConsentBanner} from "@/components/shared/cookie-consent/cookie-consent";
+
+// Главная страница — клиентский компонент в этом же сегменте, поэтому её title
+// задаётся здесь и работает дефолтом для всей группы (main).
+export const metadata: Metadata = {
+    title: "Corax — магазин спортивного питания",
+};
 
 export default function MainLayout({
                                        children, modal,

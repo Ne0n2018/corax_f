@@ -1,12 +1,16 @@
-'use client'
+import type {Metadata} from "next";
+import CartLayoutClient from "./layout-client";
 
-import React from 'react'
-import {RouteGuard} from '@/components/shared/route-guard'
+// Корзина — клиентская страница, поэтому title задаётся в серверном layout,
+// а защита авторизации осталась в клиентском layout-client.
+export const metadata: Metadata = {
+    title: "Корзина — Corax",
+};
 
 export default function CartLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    return <RouteGuard requireAuth>{children}</RouteGuard>
+    return <CartLayoutClient>{children}</CartLayoutClient>
 }

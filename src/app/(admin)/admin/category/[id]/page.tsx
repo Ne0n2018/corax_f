@@ -1,6 +1,11 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {CategoryForm} from "@/components/shared/admin/category/categoryForm";
 import {DeleteButton} from "@/components/shared/admin/category/deleteButton";
+
+export const metadata: Metadata = {
+    title: "Редактирование категории — Панель администратора",
+};
 
 interface PageProps {
     params: Promise<{id: string}>

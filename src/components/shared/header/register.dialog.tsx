@@ -14,7 +14,8 @@ import {useAuthStore} from "@/store/auth.store";
 import {PRIVACY_POLICY_URL} from "@/lib/constants";
 import Link from "next/link";
 import * as React from "react";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import {OAuthProvider} from "@/types/auth";
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
@@ -42,15 +43,17 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
         },
     });
 
+    const {isLoading, auth, loginWithOAuth} = useAuthStore()
+
+    const [oauthProvider, setOauthProvider] = useState<OAuthProvider | null>(null);
+
     useEffect(() => {
         if (!isOpen) {
             reset()
         }
     }, [isOpen, reset]);
 
-    const {isLoading, auth} = useAuthStore()
-
-    const isPending = isLoading && isSubmitting;
+    const isPending = (isLoading && isSubmitting) || oauthProvider !== null;
 
     const onSubmit = async (data: RegisterFormValues) => {
         try {
@@ -60,6 +63,17 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
             console.log(error)
         }
     };
+
+    const onOAuthRegister = async (provider: OAuthProvider) => {
+        setOauthProvider(provider);
+        try {
+            // При успехе браузер уходит на страницу провайдера, состояние не сбрасываем
+            await loginWithOAuth(provider);
+        } catch {
+            setOauthProvider(null);
+        }
+    };
+
 
     return (<>
                 <DialogHeader className='shrink-0 relative flex justify-center items-center bg-[url("/bg-register.png")] bg-contain bg-center bg-no-repeat min-h-22.5 md:min-h-35 p-4 md:p-0'>
@@ -159,8 +173,22 @@ export function RegisterDialog({onSwitchToLogin, onClose, isOpen}: RegisterProps
                     <Button className='bg-white border-[#EC5B4D] text-[#EC5B4D] hover:text-white rounded-[13px] py-3.5 mb-3' disabled={isPending} onClick={()=>onSwitchToLogin()}>
                         Войти в аккаунт
                     </Button>
-                    <Button className='py-3.5 mb-3' disabled={isPending}>Зарегистрироваться с помощью Google</Button>
-                    <Button className='py-3.5 mb-15' disabled={isPending}>Зарегистрироваться с помощью Яндекс</Button>
+                    <Button
+                        type='button'
+                        className='py-3.5 mb-3'
+                        disabled={isPending}
+                        onClick={() => onOAuthRegister('google')}
+                    >
+                        {oauthProvider === 'google' ? 'Переход…' : 'Зарегистрироваться с помощью Google'}
+                    </Button>
+                    <Button
+                        type='button'
+                        className='py-3.5 mb-15'
+                        disabled={isPending}
+                        onClick={() => onOAuthRegister('yandex')}
+                    >
+                        {oauthProvider === 'yandex' ? 'Переход…' : 'Зарегистрироваться с помощью Яндекс'}
+                    </Button>
                 </div>
         </>
     );

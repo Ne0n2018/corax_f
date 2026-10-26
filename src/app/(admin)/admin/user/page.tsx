@@ -1,5 +1,10 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {UserManagement} from "@/components/shared/admin/user/userManagment";
+
+export const metadata: Metadata = {
+    title: "Управление пользователями — Панель администратора",
+};
 
 export default function Page () {
     return (<Container className={'bg-[#2C2C31] rounded-[20px] px-5 py-7.5 mt-3.75'}>

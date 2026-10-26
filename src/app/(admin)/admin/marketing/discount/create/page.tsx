@@ -1,8 +1,13 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft} from "lucide-react";
 import {PromotionForm} from "@/components/shared/admin/promotion/PromotionForm";
+
+export const metadata: Metadata = {
+    title: "Создание акции — Панель администратора",
+};
 
 export default function Page () {
     return (

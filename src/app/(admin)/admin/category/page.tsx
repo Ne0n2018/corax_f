@@ -1,7 +1,12 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {CategoryCatalog} from "@/components/shared/admin/category/catagoryCatalog";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
+
+export const metadata: Metadata = {
+    title: "Список категорий — Панель администратора",
+};
 
 export default function Page () {
     return (

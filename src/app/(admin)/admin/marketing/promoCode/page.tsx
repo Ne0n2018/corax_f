@@ -1,7 +1,12 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {PromoCatalog} from "@/components/shared/admin/promo/promoCatalog";
+
+export const metadata: Metadata = {
+    title: "Промокоды — Панель администратора",
+};
 
 export default function Page () {
     return (

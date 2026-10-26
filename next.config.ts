@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        // Бэкенд после OAuth-входа возвращает пользователя на /dashboard
+        source: '/dashboard',
+        destination: '/account',
+        permanent: false,
+      },
+      {
         source: '/order',
         destination: '/account/orders',
         permanent: true,

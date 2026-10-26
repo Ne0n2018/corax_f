@@ -1,9 +1,14 @@
 // src/app/verify/new-verification/page.tsx
+import type {Metadata} from "next";
 import {redirect} from "next/navigation";
 import Link from "next/link";
 import {createServerApi} from "@/lib/api-server";
 import * as https from "node:https";
 import {Container} from "@/components/ui/container";
+
+export const metadata: Metadata = {
+    title: "Подтверждение почты — Corax",
+};
 
 interface PageProps {
     searchParams: Promise<{ vToken?: string }>;

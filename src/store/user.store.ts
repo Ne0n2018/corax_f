@@ -12,6 +12,11 @@ interface UserState {
     meta: UserMeta;
     isAuth: boolean;
     isLoading: boolean;
+    // Отдельный флаг для списка пользователей в админке: общий isLoading
+    // управляет загрузкой профиля и используется RouteGuard/AppLoader,
+    // поэтому его переключение при запросе списка вызывает цикл
+    // размонтирования и повторного запроса.
+    isUsersLoading: boolean;
     error: string | null;
     getMe: () => Promise<void>;
     logout: () => Promise<void>;
@@ -29,6 +34,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     users: [],
     isAuth: false,
     isLoading: true,
+    isUsersLoading: false,
     error: null,
     meta: { page: 1, limit: 10, total: 0, totalPages: 1 },
     params: { page: 1, limit: 10, search: "", sortBy: "createdAt" },
@@ -106,17 +112,17 @@ export const useUserStore = create<UserState>((set, get) => ({
     },
 
     getUsers: async () => {
-        set({ isLoading: true });
+        set({ isUsersLoading: true });
         const { params } = get();
         try {
             const response = await api.get("/admin/users", { params });
             set({
                 users: response.data.data,
                 meta: response.data.meta,
-                isLoading: false,
+                isUsersLoading: false,
             });
         } catch (error: any) {
-            set({ isLoading: false });
+            set({ isUsersLoading: false });
             toast.error(error.response?.data?.message || "Ошибка при загрузке пользователей");
         }
     },

@@ -1,5 +1,10 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {ProviderForm} from "@/components/shared/admin/provider/providerForm";
+
+export const metadata: Metadata = {
+    title: "Создание поставщика — Панель администратора",
+};
 
 export default function Page () {
     return (<Container className={'bg-[#2C2C31] rounded-[20px] px-5 py-7.5 mt-3.75'}>

@@ -1,5 +1,10 @@
+import type {Metadata} from 'next'
 import React from 'react'
 import { Container } from '@/components/ui/container'
+
+export const metadata: Metadata = {
+    title: 'Восстановление пароля — Corax',
+}
 
 export default function NewPasswordPage() {
     return (

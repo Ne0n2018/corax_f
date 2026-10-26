@@ -1,7 +1,12 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {Button} from "@/components/ui/button";
 import {ProductCatalog} from "@/components/shared/admin/product/productCatalog";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+    title: "Список товаров — Панель администратора",
+};
 
 export default function Page() {
     return (<Container className="bg-[#2C2C31] rounded-[20px] mt-3.75 px-5 py-7.5">

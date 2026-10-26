@@ -8,7 +8,7 @@ import {UserSearch} from "@/components/shared/admin/user/userSearch";
 import {UserItem} from "@/components/shared/admin/user/useritem";
 
 export function UserManagement() {
-    const { users, meta, isLoading, getUsers, params, setParams } = useUserStore();
+    const { users, meta, isUsersLoading, getUsers, params, setParams } = useUserStore();
 
     // Запрос уходит только при реальном изменении параметров списка
     useEffect(() => {
@@ -23,7 +23,7 @@ export function UserManagement() {
             <UserSearch />
 
             {/* Список */}
-            {isLoading ? (
+            {isUsersLoading ? (
                 <p className="text-white text-sm">Загрузка пользователей...</p>
             ) : users.length === 0 ? (
                 <p className="text-white text-sm">Пользователи не найдены</p>

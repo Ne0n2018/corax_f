@@ -1,8 +1,13 @@
+import type {Metadata} from "next";
 import { Container } from "@/components/ui/container";
 import { Contacts } from "@/components/shared/contacts/contacts";
 import { SelfPickup } from "@/components/shared/contacts/Self‑pickup";
 import { PaymentInfo } from "@/components/shared/contacts/payment-info";
 import { DeliveryInfo } from "@/components/shared/contacts/delivery-info";
+
+export const metadata: Metadata = {
+    title: "Контакты — Corax",
+};
 
 export default function ContactsPage() {
     return (

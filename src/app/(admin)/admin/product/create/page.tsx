@@ -1,5 +1,10 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {ProductForm} from "@/components/shared/admin/product/productForm";
+
+export const metadata: Metadata = {
+    title: "Создание товара — Панель администратора",
+};
 
 export default function Page () {
     return (

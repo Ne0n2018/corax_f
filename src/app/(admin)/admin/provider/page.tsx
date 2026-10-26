@@ -1,7 +1,12 @@
+import type {Metadata} from "next";
 import {Container} from "@/components/ui/container";
 import {ProviderCatalog} from "@/components/shared/admin/provider/providerCatalog";
 import Link from "next/link";
 import {Button} from "@/components/ui/button";
+
+export const metadata: Metadata = {
+    title: "Список поставщиков — Панель администратора",
+};
 
 
 export default function Page() {
