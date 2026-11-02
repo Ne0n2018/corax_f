@@ -55,14 +55,6 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
             reconnectionDelayMax: 10000,
         });
 
-        socket.on('connect_error', (error: any) => {
-            // Подавляем 404 — сервер может не отдавать WebSocket для уведомлений
-            if (error?.text === 'Unauthorized' || error?.message?.includes('404')) {
-                socket?.io?.destroy();
-                socket = null;
-            }
-        });
-
         socket.on('notification', (payload: NotificationSocketPayload) => {
             // У общего (broadcast) уведомления нет id — подтягиваем актуальный список
             if (!payload.id) {
