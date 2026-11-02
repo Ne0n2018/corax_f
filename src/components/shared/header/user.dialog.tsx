@@ -62,14 +62,15 @@ export function User({ onSwitchToNotify, onClose }: UserProps) {
             </DialogHeader>
             <div className="flex flex-col gap-3.75 mt-5">
                 {navLinks.map((link) => (
-                    <Button
-                        key={link.href}
-                        className="w-full text-black py-4.5 rounded-[13px] border bg-white border-[#B3B3B3] justify-start pl-7.5"
+                    <Link href={link.href} onClick={()=>onClose()} key={link.href}>
+                            
+                            <Button
+                        className="w-full text-black py-4.5 rounded-[13px] border bg-white border-[#B3B3B3] justify-start pl-7.5 cursor-pointer"
                     >
-                        <Link href={link.href} onClick={()=>onClose()}>
-                            {link.label}
-                        </Link>
+                        {link.label}
                     </Button>
+                        </Link>
+                    
                 ))}
             </div>
             <div>

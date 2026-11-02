@@ -6,6 +6,7 @@ import Image from "next/image";
 import {Heart} from "lucide-react";
 import {useFavoriteStore} from "@/store/favorite.store";
 import Link from "next/link";
+import type {MouseEvent} from "react";
 
 interface CatalogProps {
     currentSearch?: string;
@@ -53,7 +54,12 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
         };
     }, [userNextCursor, isFetchingMore, isLoading, currentSearch, currentSubCategoryId, getForCatalog]);
 
-    const handleFavoriteToggle = (productId: string, isFavorite: boolean) => {
+    // Клик по сердечку не должен открывать карточку товара —
+    // обрываем всплытие, пока событие не дошло до Link
+    const handleFavoriteToggle = (e: MouseEvent<HTMLButtonElement>, productId: string, isFavorite: boolean) => {
+        e.preventDefault();
+        e.stopPropagation();
+
         if (isFavorite) {
             deleteFavorite(productId);
         } else {
@@ -126,7 +132,7 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
                                         >
                                             <button
                                                 type="button"
-                                                onClick={() => handleFavoriteToggle(product.id, isFavorite)}
+                                                onClick={(e) => handleFavoriteToggle(e, product.id, isFavorite)}
                                                 disabled={favoriteLoading}
                                                 className={`absolute top-3 right-3 z-10 p-2.5 rounded-[13px] bg-white border transition-colors flex items-center justify-center ${
                                                     isFavorite

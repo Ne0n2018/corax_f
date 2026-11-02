@@ -4,6 +4,9 @@ import {usePathname, useRouter, useSearchParams} from "next/navigation";
 import {useCategoryStore} from "@/store/category.store";
 import {ChevronDown, ChevronUp} from "lucide-react";
 
+// Сколько подкатегорий показываем сразу, остальные — по кнопке «Показать ещё»
+const SUB_PREVIEW_LIMIT = 4;
+
 export function ProductSearchFilter() {
     const router = useRouter();
     const pathname = usePathname();
@@ -15,6 +18,8 @@ export function ProductSearchFilter() {
     const [searchQuery, setSearchQuery] = useState(urlName);
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string | null>(urlSubCategory);
     const [isExpanded, setIsExpanded] = useState(false);
+    // Какие категории развернуты вручную (нет значения — решение по выбранной подкатегории)
+    const [openedCategories, setOpenedCategories] = useState<Record<string, boolean>>({});
 
     const { categories, fetchCategories } = useCategoryStore();
 
@@ -60,6 +65,10 @@ export function ProductSearchFilter() {
         updateQueryParams(searchQuery, nextSubCategoryId);
     };
 
+    const toggleCategory = (categoryId: string, currentlyOpened: boolean) => {
+        setOpenedCategories((prev) => ({ ...prev, [categoryId]: !currentlyOpened }));
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             handleSearch();
@@ -67,23 +76,9 @@ export function ProductSearchFilter() {
     };
 
     return (
-        <div className="relative z-20 w-full text-white mb-8 shadow-xl flex flex-col justify-between">
-            {/* Фоновая SVG-фигура */}
-            <svg
-                className="absolute inset-0 w-full h-full -z-10 pointer-events-none drop-shadow-xl"
-                viewBox="0 0 1200 422"
-                fill="none"
-                preserveAspectRatio="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    d="M1200 402C1200 413.046 1191.05 422 1180 422H282.971C274.971 422 267.74 417.232 264.588 409.878L245.195 364.627C242.043 352.506 234.813 352.506 226.812 352.506H20C8.9543 352.506 0 343.552 0 332.506V20C0 8.95431 8.95431 0 20 0H1180C1191.05 0 1200 8.95431 1200 20V402Z"
-                    fill="#2C2C31"
-                />
-            </svg>
-
-            {/* Верхний основной контент */}
-            <div className="p-5 md:p-7 pb-2">
+        <div className="relative z-20 w-full text-white mb-8 flex flex-col drop-shadow-xl">
+            {/* Основной блок панели — сплошной фон вместо SVG-фигуры */}
+            <div className="relative bg-[#2C2C31] rounded-t-[20px] rounded-bl-[20px] p-5 md:p-7 pb-6">
                 {/* Заголовок */}
                 <h2 className="text-xl md:text-2xl font-bold font-russo mb-4">
                     Скорее найди свой товар!
@@ -117,6 +112,13 @@ export function ProductSearchFilter() {
                     >
                         {categories.map((category) => {
                             const subList = category.SubCategory || [];
+                            const selectedIndex = subList.findIndex((sub) => sub.id === selectedSubCategoryId);
+                            // Если выбранная подкатегория спрятана — раскрываем список автоматически
+                            const isOpened = openedCategories[category.id] ?? selectedIndex >= SUB_PREVIEW_LIMIT;
+                            const hasMore = subList.length > SUB_PREVIEW_LIMIT;
+                            const visibleSubs = hasMore && !isOpened
+                                ? subList.slice(0, SUB_PREVIEW_LIMIT)
+                                : subList;
 
                             return (
                                 <div key={category.id} className="flex flex-col space-y-2">
@@ -124,7 +126,7 @@ export function ProductSearchFilter() {
                                         {category.name}
                                     </h3>
                                     <ul className="space-y-1 text-xs md:text-sm text-gray-300">
-                                        {subList.map((subCat) => {
+                                        {visibleSubs.map((subCat) => {
                                             const isSelected = selectedSubCategoryId === subCat.id;
                                             return (
                                                 <li key={subCat.id}>
@@ -143,6 +145,20 @@ export function ProductSearchFilter() {
                                             );
                                         })}
                                     </ul>
+
+                                    {/* Кнопка раскрытия оставшихся подкатегорий — следующей строкой */}
+                                    {hasMore && (
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleCategory(category.id, isOpened)}
+                                            className="self-start inline-flex items-center gap-1 text-xs font-medium text-[#D83C2D] hover:text-white transition-colors cursor-pointer"
+                                        >
+                                            {isOpened ? "Свернуть" : `Показать ещё (${subList.length - SUB_PREVIEW_LIMIT})`}
+                                            {isOpened
+                                                ? <ChevronUp className="w-3.5 h-3.5" />
+                                                : <ChevronDown className="w-3.5 h-3.5" />}
+                                        </button>
+                                    )}
                                 </div>
                             );
                         })}
@@ -150,12 +166,28 @@ export function ProductSearchFilter() {
                 )}
             </div>
 
-            {/* Нижняя полка с кнопкой во всю ширину выступа */}
-            <div className="w-full pl-[24%] pr-4 md:pr-8 pt-1 pb-3">
+            {/* S-образный выступ: SVG-изгиб + полка с кнопкой */}
+            <div className="relative h-14 -mt-px">
+                {/* Изгиб растягивается на всю ширину (preserveAspectRatio="none"),
+                    поэтому его границы 18.9%–23.6% совпадают с белым язычком каталога */}
+                <svg
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                    viewBox="0 0 1200 69.494"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M20 0H226.812C234.813 0 242.043 0 245.195 12.121L264.588 57.372C267.74 64.726 274.971 69.494 282.971 69.494H1180C1191.05 69.494 1200 60.54 1200 49.494V0H20Z"
+                        fill="#2C2C31"
+                    />
+                </svg>
+
+                {/* Кнопка «Развернуть» — в полке выступа, правее изгиба */}
                 <button
                     type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="w-full py-2 hover:bg-white/5 rounded-xl text-gray-300 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="absolute left-[26%] right-4 top-1/2 -translate-y-1/2 py-2 hover:bg-white/5 rounded-xl text-gray-300 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                     {isExpanded ? "Свернуть фильтр" : "Развернуть фильтр"}
                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

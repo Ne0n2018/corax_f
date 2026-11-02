@@ -42,11 +42,25 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         const socketUrl = process.env.NEXT_PUBLIC_SERVER_URL;
         if (!socketUrl) return;
 
-        socket = io(socketUrl, {
+        const socketHost = socketUrl.replace(/\/api\/?$/, '');
+        const socketPath = socketUrl.endsWith('/api') ? '/api/socket.io' : '/socket.io';
+
+        socket = io(socketHost, {
+            path: socketPath,
+            transports: ['websocket'],
             withCredentials: true, // обязательна сессионная cookie
             reconnection: true,
-            reconnectionDelay: 1000,
+            reconnectionAttempts: 3,
+            reconnectionDelay: 2000,
             reconnectionDelayMax: 10000,
+        });
+
+        socket.on('connect_error', (error: any) => {
+            // Подавляем 404 — сервер может не отдавать WebSocket для уведомлений
+            if (error?.text === 'Unauthorized' || error?.message?.includes('404')) {
+                socket?.io?.destroy();
+                socket = null;
+            }
         });
 
         socket.on('notification', (payload: NotificationSocketPayload) => {
