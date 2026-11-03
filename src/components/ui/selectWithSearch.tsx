@@ -60,18 +60,22 @@ export const SelectWithSearch = ({
 
     return (
         <div ref={containerRef} className="relative w-full">
-            {/* Кнопка открытия списка */}
+            {/* Кнопка открытия списка: min-h вместо h — высота растёт,
+                    если выбранное название не влезает в одну строку */}
             <button
                 type="button"
                 onClick={() => setIsOpen((prev) => !prev)}
-                className={`w-full bg-[#46464E] hover:bg-[#5a5a65] text-white rounded-[14px] px-4 py-3 text-sm flex items-center justify-between transition-colors h-11 border ${
+                className={`w-full bg-[#46464E] hover:bg-[#5a5a65] text-white rounded-[14px] px-4 py-2 text-sm flex items-center justify-between gap-2 transition-colors min-h-11 h-auto border ${
                     error ? "border-red-500 ring-1 ring-red-500/50" : "border-transparent"
                 }`}
             >
-                <span className={`truncate ${!selectedOption && !(value && fallbackLabel) ? "text-white/50" : "text-white"}`}>
+                <span
+                    className={`text-left leading-snug ${!selectedOption && !(value && fallbackLabel) ? "text-white/50" : "text-white"}`}
+                    style={{whiteSpace: 'normal', wordBreak: 'break-word'}}
+                >
                     {displayLabel}
                 </span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
             </button>
 
             {/* Выпадающий блок с поиском и списком */}
@@ -114,11 +118,12 @@ export const SelectWithSearch = ({
                                         setIsOpen(false);
                                         setSearch("");
                                     }}
-                                    className={`w-full text-left px-3 py-2 text-xs rounded-xl transition-colors truncate ${
+                                    className={`w-full text-left px-3 py-2 text-xs rounded-xl transition-colors leading-snug ${
                                         value === opt.id
                                             ? "bg-red-500 text-white font-medium"
                                             : "text-white/90 hover:bg-[#46464E]"
                                     }`}
+                                    style={{whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'anywhere'}}
                                 >
                                     {opt.name}
                                 </button>

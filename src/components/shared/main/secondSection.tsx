@@ -24,25 +24,23 @@ export function SecondSection({className}:SecondSectionProps) {
     return (
         // Внешний блок: margin-top подобран так, чтобы зазор между телами 1→2
         // оставался 128px: на десктопе -72px (выступ 100px), на мобилке -2px (выступ 65px)
-        <div className={cn("relative w-full -mt-0.5 md:-mt-18 pt-16.25 md:pt-25", className)}>
+        <div className={cn("relative w-full -mt-0.5 md:-mt-18 pt-12 md:pt-20", className)}>
 
             {/* Body-блок секции: сплошной фон, скругления и контент */}
             <div
-                className="relative w-full pt-8 pb-6 md:pt-14 md:pb-10 px-4 md:px-14 flex flex-col lg:flex-row items-center lg:items-start justify-between gap-4 md:gap-8 bg-[#2C2C31] rounded-[20px] md:rounded-[22px] shadow-sm"
+                className="relative w-full pt-6 pb-6 md:pt-10 md:pb-10 px-4 md:px-14 flex flex-col lg:flex-row items-center lg:items-start justify-between gap-4 md:gap-8 bg-[#2C2C31] rounded-[20px] md:rounded-[22px] shadow-sm"
                 style={{borderTopLeftRadius: 0}}
             >
 
                 {/* Текстовый блок и кнопка */}
-                <div className="w-full lg:max-w-xs flex flex-col items-start gap-2.5 md:gap-3.5 z-10 pt-3 md:pt-6">
-                    <h2 className="text-2xl md:text-3xl font-russo text-white">Топ сезона</h2>
-
+                <div className="w-full lg:max-w-xs flex flex-col items-start gap-2.5 md:gap-3.5 z-10 pt-2 md:pt-6">
                     {/* Сокращенный текст для мобильных (< md) */}
-                    <p className="md:hidden font-mono text-xs text-[#BCBCBC] leading-relaxed">
+                    <p className="md:hidden font-mono text-sm text-[#BCBCBC] leading-relaxed">
                         Лидеры продаж сезона
                     </p>
 
                     {/* Полный текст для десктопа (>= md) */}
-                    <p className="hidden md:block font-mono text-sm text-[#BCBCBC] leading-relaxed">
+                    <p className="hidden md:block font-mono text-base text-[#BCBCBC] leading-relaxed">
                         Самые популярные и востребованные товары этого сезона, проверенные временем и нашей аудиторией
                     </p>
 
@@ -87,7 +85,9 @@ export function SecondSection({className}:SecondSectionProps) {
             </div>
 
             {/* Выступ сверху слева: стыкуется с первой секцией */}
-            <SectionTab side="top-left" fill="#2C2C31" />
+            <SectionTab side="top-left" fill="#2C2C31">
+                <h2 className="text-2xl md:text-4xl font-russo text-white leading-tight">Топ сезона</h2>
+            </SectionTab>
         </div>
     );
 }

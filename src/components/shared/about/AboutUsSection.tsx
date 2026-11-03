@@ -19,13 +19,6 @@ export const AboutUsSection = () => {
 			<div className="relative mx-auto flex w-full max-w-360 flex-col gap-10 px-4 sm:px-8 lg:h-full lg:flex-row lg:items-stretch lg:gap-16 lg:pl-14 lg:pr-0">
 				{/* Фотография магазина */}
 				<div className="relative order-1 mx-auto w-full max-w-130 lg:order-1 lg:mx-0 lg:w-110 lg:max-w-none lg:shrink-0 lg:self-center">
-					{/* Белая плашка-подложка */}
-					<div className="absolute -top-14 -right-3 rounded-3xl bg-[#e9e9e7] px-6 py-3 sm:-right-6">
-						<span className="text-sm font-medium tracking-wide text-[#1d1c1a] whitespace-nowrap">
-							Наш магазин
-						</span>
-					</div>
-
 					<div className="relative aspect-4/3 w-full overflow-hidden rounded-[40px] bg-[#1d1c1a]">
 						<Image
 							src="/about.png"
@@ -38,9 +31,22 @@ export const AboutUsSection = () => {
 						/>
 					</div>
 
-					<span className="absolute bottom-5 left-6 text-2xl leading-none font-semibold tracking-[0.08em] text-white uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] sm:text-3xl">
-						Corax
-					</span>
+					{/* Прорезь сверху справа: прижата к правому краю и выходит за верх
+						фото. Свешивающаяся часть совпадает с фоном секции (#2C2C31),
+						поэтому видны только скруглённые углы внутри кадра — эффект врезки.
+						Блоки лежат вне overflow-hidden, иначе их обрежет по границе фото. */}
+					<div className="absolute top-0 right-0 z-10 -translate-y-1/2 rounded-3xl bg-[#2C2C31] px-6 py-3.5">
+						<span className="text-sm font-medium tracking-wide text-white whitespace-nowrap">
+							Наш магазин
+						</span>
+					</div>
+
+					{/* Прорезь снизу слева: зеркально — прижата к левому краю, уходит за низ фото */}
+					<div className="absolute bottom-0 left-0 z-10 translate-y-1/2 rounded-3xl bg-[#2C2C31] px-7 py-4">
+						<span className="text-2xl leading-none font-semibold tracking-[0.08em] text-white uppercase sm:text-3xl">
+							Corax
+						</span>
+					</div>
 				</div>
 
 				{/* Текстовый блок: на десктопе тянется на всю высоту формы и упирается в правую грань */}

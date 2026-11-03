@@ -16,13 +16,6 @@ export function ThirdSection({className}: Props) {
                 className="relative w-full pt-6 pb-20 px-4 md:px-14 flex flex-col justify-between bg-white rounded-[20px] md:rounded-[22px] shadow-sm"
                 style={{borderBottomRightRadius: 0}}
             >
-                {/* Заголовок */}
-                <div className="z-10 mb-4 md:mb-0 md:order-2 flex justify-center md:justify-end md:pr-10 md:pt-2">
-                    <h2 className="font-russo text-2xl md:text-2xl text-black text-center md:text-right">
-                        Наши преимущества
-                    </h2>
-                </div>
-
                 {/* Карточки преимуществ */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 md:gap-6 z-10 md:order-1 md:mb-4">
                     <div className="flex flex-row md:flex-col items-center justify-between gap-3 md:gap-4 border border-[#E7E7E7] rounded-[20px] p-3.5 md:p-5 bg-white drop-shadow-sm">
@@ -75,8 +68,10 @@ export function ThirdSection({className}: Props) {
                 </div>
             </div>
 
-            {/* Выступ снизу справа: 65px на мобильных, 100px на десктопе */}
-            <SectionTab side="bottom-right" fill="white" />
+            {/* Выступ снизу справа: шов сдвинут вправо (вариант wide) */}
+            <SectionTab side="bottom-right" fill="white" variant="wide">
+                <h2 className="font-russo text-sm md:text-2xl text-black leading-tight">Наши преимущества</h2>
+            </SectionTab>
         </section>
     );
 }

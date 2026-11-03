@@ -71,7 +71,23 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
         <section className="relative px-4 py-6 -mt-19">
             {/* Подложка: SVG-шапка фиксированной высоты + белый блок для тела */}
             <div className="absolute inset-0 -z-10 flex flex-col pointer-events-none">
-                <div className="w-full h-19 sm:h-22 shrink-0">
+                {/* Мобильная шапка: язык расширен (150 из 375), иначе заголовок
+                    вылезает за изгиб — десктопный path в 375px сжимает его до 67px */}
+                <div className="w-full h-19 shrink-0 sm:hidden">
+                    <svg
+                        viewBox="0 0 375 92"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-full h-full"
+                        preserveAspectRatio="none"
+                    >
+                        <path
+                            d="M0 20C0 8.95431 8.95431 0 20 0H150C158.09 0 165.38 4.87268 168.48 12.3457L188.23 60.0205C191.33 67.5001 198.63 72.3731 206.72 72.3652L355 71.4707C366.05 71.4599 375 80.4175 375 91.4707V92H0V20Z"
+                            fill="white"
+                        />
+                    </svg>
+                </div>
+                <div className="w-full h-19 sm:h-22 shrink-0 hidden sm:block">
                     <svg
                         viewBox="0 0 1200 92"
                         fill="none"

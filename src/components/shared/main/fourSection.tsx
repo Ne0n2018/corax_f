@@ -29,16 +29,6 @@ export function FourSection({className}:Props) {
                 style={{borderTopLeftRadius: 0}}
             >
 
-                {/* Заголовок секции */}
-                <div className="flex flex-col items-start gap-1 mb-6 md:mb-10 z-10 pt-2 md:pt-2">
-                    <h2 className="text-[20px] md:text-3xl font-russo text-white leading-tight">
-                        Акции и скидки
-                    </h2>
-                    <p className="font-mono text-xs md:text-sm text-[#BCBCBC] max-w-52.5 sm:max-w-none">
-                        Выгодные предложения и специальные цены на популярные товары
-                    </p>
-                </div>
-
                 {/* Скелетоны при загрузке */}
                 {isLoading && (
                     <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 w-full overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
@@ -105,8 +95,18 @@ export function FourSection({className}:Props) {
                 )}
             </div>
 
-            {/* Выступ сверху слева: отрисовывается отдельным SVG на стыке с предыдущей секцией */}
-            <SectionTab side="top-left" fill="#2C2C31" />
+            {/* Выступ сверху слева: вариант wide — кривая шва сдвинута вправо,
+                тёмный выступ шире, поэтому заголовок с подзаголовком помещаются крупнее */}
+            <SectionTab side="top-left" fill="#2C2C31" variant="wide">
+                <div className="flex flex-col items-start gap-1">
+                    <h2 className="text-[20px] md:text-4xl font-russo text-white leading-tight">
+                        Акции и скидки
+                    </h2>
+                    <p className="hidden md:block font-mono text-xs md:text-sm text-[#BCBCBC] leading-snug">
+                        Выгодные предложения и специальные цены на популярные товары
+                    </p>
+                </div>
+            </SectionTab>
         </section>
     );
 }

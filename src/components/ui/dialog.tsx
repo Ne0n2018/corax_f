@@ -43,9 +43,12 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeButtonClassName,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
+  /** Дополнительные классы для штатного крестика (например, скрыть на мобилке). */
+  closeButtonClassName?: string
 }) {
   return (
     <DialogPortal>
@@ -65,7 +68,10 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute -top-14 -right-6 px-4.25 py-4.5 text-black bg-white"
+                className={cn(
+                  "absolute -top-14 -right-6 px-4.25 py-4.5 text-black bg-white",
+                  closeButtonClassName
+                )}
                 size="icon-sm"
               />
             }

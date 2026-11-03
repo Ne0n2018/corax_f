@@ -168,10 +168,25 @@ export function ProductSearchFilter() {
 
             {/* S-образный выступ: SVG-изгиб + полка с кнопкой */}
             <div className="relative h-14 -mt-px">
+                {/* Мобильный изгиб: сдвинут на те же 66 юнитов влево, что и язычок
+                    каталога, — тёмный изгиб остаётся правее белого (шов сходится) */}
+                <svg
+                    className="absolute inset-0 w-full h-full pointer-events-none sm:hidden"
+                    viewBox="0 0 375 69.494"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M20 0H160.7C168.7 0 175.9 0 179.1 12.121L198.5 57.372C201.6 64.726 208.9 69.494 216.8 69.494H355C366.05 69.494 375 60.54 375 49.494V0H20Z"
+                        fill="#2C2C31"
+                    />
+                </svg>
+
                 {/* Изгиб растягивается на всю ширину (preserveAspectRatio="none"),
                     поэтому его границы 18.9%–23.6% совпадают с белым язычком каталога */}
                 <svg
-                    className="absolute inset-0 w-full h-full pointer-events-none"
+                    className="absolute inset-0 w-full h-full pointer-events-none hidden sm:block"
                     viewBox="0 0 1200 69.494"
                     fill="none"
                     preserveAspectRatio="none"
@@ -183,11 +198,12 @@ export function ProductSearchFilter() {
                     />
                 </svg>
 
-                {/* Кнопка «Развернуть» — в полке выступа, правее изгиба */}
+                {/* Кнопка «Развернуть» — в полке выступа, правее изгиба.
+                    На мобилке изгиб доходит до 58% ширины, поэтому полка там же */}
                 <button
                     type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="absolute left-[26%] right-4 top-1/2 -translate-y-1/2 py-2 hover:bg-white/5 rounded-xl text-gray-300 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    className="absolute left-[62%] sm:left-[26%] right-4 top-1/2 -translate-y-1/2 py-2 hover:bg-white/5 rounded-xl text-gray-300 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                     {isExpanded ? "Свернуть фильтр" : "Развернуть фильтр"}
                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}

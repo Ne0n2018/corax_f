@@ -20,11 +20,11 @@ export default function Home() {
   return (
       <Container>
         <FirstSection isAuthenticated={isAuth}/>
-        {/* 1 -> 2: зазор между телами 128px */}
+        {/* 1 -> 2: зазор между телами 128px, выступы стыкуются (bottom-right + top-left) */}
         <SecondSection className="-mt-0.5 md:-mt-18"/>
         {/* 2 -> 3: зазор между телами 10px, выступов на стыке нет */}
         <ThirdSection className="mt-2.5"/>
-        {/* 3 -> 4: зазор между телами 127px */}
+        {/* 3 -> 4: зазор между телами 127px, выступы стыкуются (top-left + bottom-right) */}
         <FourSection className="-mt-0.75 md:-mt-18.25"/>
       </Container>
   )

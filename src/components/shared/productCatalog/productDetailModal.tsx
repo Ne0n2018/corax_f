@@ -2,7 +2,7 @@
 
 import {useEffect, useRef, useState} from 'react'
 import Image from 'next/image'
-import {ChevronRight, Heart, Minus, Plus} from 'lucide-react'
+import {ChevronRight, Heart, Minus, Plus, X} from 'lucide-react'
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import {useFavoriteStore} from '@/store/favorite.store'
 import {useProductStore} from "@/store/product.store"
@@ -138,10 +138,12 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
     const tasteLabel = currentUserProduct?.isClothes ? 'Цвет' : 'Вкус'
 
     // Переход сразу к оформлению заказа.
-    // Окно закроется само: на /cart параллельный слот @modal отдаёт default.tsx (null).
-    // Вызывать onClose() (router.back()) здесь нельзя — back отменяет push.
+    // replace, а не push: запись /catalog/[id] в истории заменяется на /cart —
+    // «модальной» страницы в стеке не остаётся и back ведёт в каталог.
+    // Слот @modal при мягкой навигации сохраняет модалку — её скрывает
+    // pathname-защита в @modal/catalog/[id]/page.tsx.
     const handleBuyNow = () => {
-        router.push('/cart')
+        router.replace('/cart')
     }
 
     // Добавление в корзину (отправляем столько раз, сколько выбрано единиц товара)
@@ -185,7 +187,19 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
             <DialogContent
                 ref={modalContentRef}
                 className="bg-white w-full sm:max-w-full md:max-w-full max-h-[90vh] overflow-y-auto custom-scrollbar overflow-x-hidden p-6 sm:p-8 rounded-[18px] font-sans"
+                closeButtonClassName="hidden sm:inline-flex"
             >
+                {/* Крестик для мобилки: штатный вынесен за карточку (-top-14 -right-6)
+                    и на узком экране уходит за край вьюпорта */}
+                <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Закрыть"
+                    className="sm:hidden absolute top-3.5 right-3.5 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-[#D83C2D] hover:text-white"
+                >
+                    <X className="w-5 h-5"/>
+                </button>
+
                 <DialogHeader className="sr-only">
                     <DialogTitle>{currentUserProduct?.name} от {currentUserProduct?.Provider?.name} ({currentUserProduct?.formRelease})</DialogTitle>
                     <DialogDescription>Детальная информация о товаре</DialogDescription>
