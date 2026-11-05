@@ -20,6 +20,7 @@ import {SelectWithSearch} from "@/components/ui/selectWithSearch";
 import {cn} from "@/lib/utils";
 import {ImagePreview} from "@/components/ui/imagePreview";
 import {toast} from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 type ProductFormValues = z.input<typeof productSchema>;
 type ProductFormOutput = z.output<typeof productSchema>;
@@ -276,7 +277,21 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
                     return (
                         <div key={field.name}>
                             <label className="text-white text-sm ml-2 block mb-1">{field.label}</label>
-                            <Input
+                            {
+                                field.textArea ? (
+                                <Textarea
+                                    id={field.name}
+                                {...register(field.name as keyof ProductFormValues)}
+                                placeholder={field.placeholder}
+                                className={cn(
+                                    "bg-[#2C2C31] border text-white rounded-[20px] px-7.5 py-5.75 focus-visible:ring-1",
+                                    fieldError
+                                        ? "border-red-500 focus-visible:ring-red-500"
+                                        : "border-[#50505E] focus-visible:ring-red-500"
+                                )}
+                                />
+                            ) : (
+                                <Input
                                 id={field.name}
                                 {...register(field.name as keyof ProductFormValues)}
                                 placeholder={field.placeholder}
@@ -287,6 +302,8 @@ export function ProductForm({ productId, initialData, className }: ProductFormPr
                                         : "border-[#50505E] focus-visible:ring-red-500"
                                 )}
                             />
+                            )
+                            }
                             {fieldError && (
                                 <span className="text-red-500 text-xs ml-2 mt-1 block">
                                     {fieldError?.message as string}
