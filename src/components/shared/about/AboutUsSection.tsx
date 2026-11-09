@@ -1,5 +1,49 @@
 import Image from 'next/image'
 
+// Прорезь в маске изображения: прямоугольник 160×120 px.
+// На границе прорези с краем кадра скругляется сам материал изображения
+// (выпуклая дуга радиуса 25px срезает острый «мыс»). Внутренний угол
+// прорези — обычный скруглённый угол выреза (вогнутая дуга, радиус 25px).
+const CUT_W = 160
+const CUT_H = 120
+const CUT_R = 25
+
+// SVG вычитаемой формы (заливка — непрозрачная, маска переводит её в «дыру»).
+// viewBox с отступом 25px слева/снизу: форма на 25px шире прорези с той
+// стороны, где нужно скруглить угол самого изображения на границе кадра.
+const cutShape = (viewBox: string, d: string) =>
+    `url("data:image/svg+xml,${encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${CUT_W + CUT_R}" height="${CUT_H + CUT_R}">` +
+        `<path d="${d}" fill="#fff"/></svg>`
+    )}")`
+
+// Верхний правый вырез: скругления материала в углах, прижатых к верхней
+// и правой границам кадра; внутренний угол (левый нижний) — скругление выреза
+const CUT_TOP = cutShape(
+    `${-CUT_R} 0 ${CUT_W + CUT_R} ${CUT_H + CUT_R}`,
+    `M 0 0 H ${CUT_W} V ${CUT_H + CUT_R} A ${CUT_R} ${CUT_R} 0 0 0 ${CUT_W - CUT_R} ${CUT_H} H ${CUT_R} A ${CUT_R} ${CUT_R} 0 0 1 0 ${CUT_H - CUT_R} V ${CUT_R} A ${CUT_R} ${CUT_R} 0 0 0 ${-CUT_R} 0 Z`
+)
+// Нижний левый вырез: зеркальная копия (поворот на 180°)
+const CUT_BOTTOM = cutShape(
+    `0 ${-CUT_R} ${CUT_W + CUT_R} ${CUT_H + CUT_R}`,
+    `M ${CUT_W} ${CUT_H} H 0 V ${-CUT_R} A ${CUT_R} ${CUT_R} 0 0 0 ${CUT_R} 0 H ${CUT_W - CUT_R} A ${CUT_R} ${CUT_R} 0 0 1 ${CUT_W} ${CUT_R} V ${CUT_H - CUT_R} A ${CUT_R} ${CUT_R} 0 0 0 ${CUT_W + CUT_R} ${CUT_H} Z`
+)
+
+// Слои: вырез сверху справа, вырез снизу слева, белый базовый прямоугольник (весь кадр).
+// mask-composite: exclude вычитает каждый вырез из результата ниже.
+const IMAGE_MASK: React.CSSProperties = {
+    WebkitMaskImage: `${CUT_TOP}, ${CUT_BOTTOM}, linear-gradient(#fff, #fff)`,
+    WebkitMaskSize: `${CUT_W + CUT_R}px ${CUT_H + CUT_R}px, ${CUT_W + CUT_R}px ${CUT_H + CUT_R}px, 100% 100%`,
+    WebkitMaskPosition: 'right 0 top 0, left 0 bottom 0, 0 0',
+    WebkitMaskRepeat: 'no-repeat',
+    WebkitMaskComposite: 'xor, xor, source-over',
+    maskImage: `${CUT_TOP}, ${CUT_BOTTOM}, linear-gradient(#fff, #fff)`,
+    maskSize: `${CUT_W + CUT_R}px ${CUT_H + CUT_R}px, ${CUT_W + CUT_R}px ${CUT_H + CUT_R}px, 100% 100%`,
+    maskPosition: 'right 0 top 0, left 0 bottom 0, 0 0',
+    maskRepeat: 'no-repeat',
+    maskComposite: 'exclude, exclude, add',
+}
+
 export const AboutUsSection = () => {
 	return (
 		<section className="relative z-20 min-h-150 rounded-[20px] bg-[#2C2C31] pt-14 pb-16 sm:pt-16 sm:pb-20 lg:aspect-1188/847 lg:min-h-0 lg:rounded-none lg:bg-transparent lg:pt-0 lg:pb-0">
@@ -17,35 +61,37 @@ export const AboutUsSection = () => {
 			</svg>
 
 			<div className="relative mx-auto flex w-full max-w-360 flex-col gap-10 px-4 sm:px-8 lg:h-full lg:flex-row lg:items-stretch lg:gap-16 lg:pl-14 lg:pr-0">
-				{/* Фотография магазина */}
-				<div className="relative order-1 mx-auto w-full max-w-130 lg:order-1 lg:mx-0 lg:w-110 lg:max-w-none lg:shrink-0 lg:self-center">
-					<div className="relative aspect-4/3 w-full overflow-hidden rounded-[40px] bg-[#1d1c1a]">
-						<Image
-							src="/about.png"
-							alt="Наш магазин Corax"
-							fill
-							priority
-							sizes="(max-width: 1024px) 100vw, 520px"
-							className="object-cover"
-							draggable={false}
-						/>
-					</div>
+				{/* Фотография магазина: на десктопе кадр фиксирован 566×727 (w-141.5/h-181.75)
+					и отцентрован по высоте, по ширине отстоит на 56px от левого края формы */}
+				<div className="relative order-1 mx-auto w-full max-w-130 lg:order-1 lg:mx-0 lg:w-141.5 lg:max-w-none lg:shrink-0 lg:self-center">
+					<div className="relative aspect-4/3 w-full overflow-hidden rounded-[25px] lg:aspect-auto lg:h-181.75">
+						{/* Маска лежит на отдельном слое: она «прокусывает» кадр,
+							а rounded+overflow контейнера держат скругление углов */}
+						<div className="absolute inset-0 bg-[#1d1c1a]" style={IMAGE_MASK}>
+							<Image
+								src="/about.png"
+								alt="Наш магазин Corax"
+								fill
+								priority
+								sizes="(max-width: 1024px) 100vw, 566px"
+								className="object-cover"
+								draggable={false}
+							/>
+						</div>
 
-					{/* Прорезь сверху справа: прижата к правому краю и выходит за верх
-						фото. Свешивающаяся часть совпадает с фоном секции (#2C2C31),
-						поэтому видны только скруглённые углы внутри кадра — эффект врезки.
-						Блоки лежат вне overflow-hidden, иначе их обрежет по границе фото. */}
-					<div className="absolute top-0 right-0 z-10 -translate-y-1/2 rounded-3xl bg-[#2C2C31] px-6 py-3.5">
-						<span className="text-sm font-medium tracking-wide text-white whitespace-nowrap">
-							Наш магазин
-						</span>
-					</div>
+						{/* Подписи без собственного фона: блоки совпадают с вырезами
+							по размеру и позиции, текст центрируется по центру прорези */}
+						<div className="absolute top-0 right-0 z-10 flex h-30 w-40 items-center justify-center">
+							<span className="text-xl font-bold tracking-wide text-white whitespace-nowrap">
+								Наш магазин
+							</span>
+						</div>
 
-					{/* Прорезь снизу слева: зеркально — прижата к левому краю, уходит за низ фото */}
-					<div className="absolute bottom-0 left-0 z-10 translate-y-1/2 rounded-3xl bg-[#2C2C31] px-7 py-4">
-						<span className="text-2xl leading-none font-semibold tracking-[0.08em] text-white uppercase sm:text-3xl">
-							Corax
-						</span>
+						<div className="absolute bottom-0 left-0 z-10 flex h-30 w-40 items-center justify-center">
+							<span className="text-2xl leading-none font-semibold tracking-[0.08em] text-white uppercase sm:text-3xl">
+								Corax
+							</span>
+						</div>
 					</div>
 				</div>
 
