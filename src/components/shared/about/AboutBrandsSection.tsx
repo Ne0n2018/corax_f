@@ -10,6 +10,13 @@ import { BrandDialog } from './BrandDialog'
 const TOP_EDGE_PATH =
 	'M562.968 0C570.889 0 578.064 4.67504 581.264 11.9213L601.636 58.059C604.841 65.3153 612.03 69.9923 619.963 69.9803L1179.97 69.1338C1191.03 69.1171 1200 78.0763 1200 89.1338V1473C1200 1484.05 1191.05 1493 1180 1493H20C8.95429 1493 0 1484.05 0 1473V20C0 8.9543 8.95431 0 20 0H562.968Z'
 
+// Мобильная верхняя кромка белого блока: параллельная копия нижнего шва
+// тёмного блока (выступ в AboutUsSection: диагональ (150,0)->(233,70)),
+// смещённая вниз на 15px — зазор вдоль всего шва, как на десктопе.
+// Координаты: y=0 — верх полосы (секция отступлена на mt-3.75 = 15px).
+const MOBILE_TOP_EDGE_PATH =
+	'M 0 20 Q 0 0 20 0 H 150 C 178 0 205 70 233 70 H 355 Q 375 70 375 50 V 85 H 0 Z'
+
 const BRAND_DESCRIPTION_MAX = 80
 
 interface BrandCardProps {
@@ -94,8 +101,21 @@ export const AboutBrandsSection = () => {
 	const brands = publicProviders.filter((provider) => provider.name)
 
 	return (
-		// На десктопе секция заходит под низ тёмного блока «О нас», но с зазором 15px вдоль стыка
-		<section className="relative z-10 mb-10 lg:-mt-[calc(6.6%_-_23px)]">
+		// На десктопе секция заходит под низ тёмного блока «О нас», но с зазором 15px вдоль стыка.
+		// На мобилке тот же зазор: отступ 15px + кромка-полоса ниже повторяет шов тёмного блока.
+		<section className="relative z-10 mb-10 mt-3.75 lg:-mt-[calc(6.6%-23px)]">
+			{/* Мобильная верхняя кромка: параллельный копи-шов выступа тёмного блока
+				с зазором 15px вдоль всей диагонали (скругления 20px в углах) */}
+			<div aria-hidden className="relative block h-21.25 w-full lg:hidden">
+				<svg
+					viewBox="0 0 375 85"
+					preserveAspectRatio="none"
+					className="pointer-events-none absolute inset-0 h-full w-full"
+				>
+					<path d={MOBILE_TOP_EDGE_PATH} fill="#ffffff" />
+				</svg>
+			</div>
+
 			{/* Верхняя кромка белого блока: вырез справа под выступ тёмной формы */}
 			<div
 				aria-hidden
@@ -111,8 +131,9 @@ export const AboutBrandsSection = () => {
 				</svg>
 			</div>
 
-			{/* Белое тело блока */}
-			<div className="rounded-t-[40px] bg-white px-4 pb-14 pt-12 sm:px-8 lg:rounded-none lg:px-14 lg:pt-12">
+			{/* Белое тело блока: скругления верхней кромки рисует полоса выше,
+				телу скругления не нужны (иначе двойной радиус оставит щель на стыке) */}
+			<div className="bg-white px-4 pb-14 pt-6 sm:px-8 lg:px-14 lg:pt-12">
 				{/* Заголовок: на десктопе выносится в верхний левый выступ белой формы */}
 				<div className="flex flex-col gap-1 pb-2 lg:absolute lg:top-0 lg:left-0 lg:px-14 lg:pt-7 lg:pb-0">
 					<h2 className="font-sans text-[24px] leading-none font-bold text-[#111317] sm:text-[28px]">

@@ -6,17 +6,25 @@ import {CallbackDialog} from "@/components/shared/callback/callback.dialog";
 import {SectionTab} from "@/components/shared/main/sectionTab";
 
 interface FirstSectionProps {
+    /**
+     * Шапка меняет внешний вид при авторизации: появляется тёмная плашка
+     * со скруглением (bg-[#2C2C31] rounded-[20px]), поэтому сверху нужен зазор.
+     * Без авторизации шапка прозрачная и секция может идти вплотную к ней.
+     */
     isAuthenticated: boolean;
 }
 
 export function FirstSection({ isAuthenticated }: FirstSectionProps) {
     return (
-        // Внешний блок: только позиционирование, отступ сверху и место под выступ снизу
-        <div className={cn("relative w-full pb-16.25 md:pb-25 md:mt-3.75", !isAuthenticated && "md:mt-0 mt-2.5")}>
+        // Внешний блок: только позиционирование, отступ сверху и место под выступ снизу.
+        // На мобилке зазор всегда 15px (mt-3.75) — такой же, как до подвала.
+        <div className={cn("relative w-full pb-16.25 md:pb-25 mt-3.75", !isAuthenticated && "md:mt-0")}>
 
-            {/* Body-блок: белый фон, скругления и контент секции */}
+            {/* Body-блок: белый фон, скругления и контент секции.
+                На десктопе без авторизации верхний левый угол квадратный —
+                он сливается с белой обёрткой логотипа в шапке */}
             <div
-                className="relative w-full flex px-6 py-13 md:px-14 md:py-10 bg-white rounded-[20px] md:rounded-[22px] shadow-sm"
+                className={cn("relative w-full flex px-6 py-13 md:px-14 md:py-10 bg-white rounded-[20px] md:rounded-[22px] shadow-sm", !isAuthenticated && "md:rounded-tl-none")}
                 style={{borderBottomRightRadius: 0}}
             >
 

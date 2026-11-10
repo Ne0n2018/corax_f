@@ -83,6 +83,19 @@ const defaultNavigationLinks: NavbarNavLink[] = [
 const isLinkActive = (href: string, pathname: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`)
 
+// Белая «обёртка» логотипа в неавторизованном состоянии (десктоп).
+// Геометрия повторяет выступы секций (см. sectionTab.tsx): левый край,
+// скругление 22px сверху слева, горизонтальная верхняя грань и S-образный
+// скос справа. У кривой горизонтальные касательные с обоих концов — она
+// плавно выходит из верхней грани и так же плавно входит в нижнюю, а нижняя
+// грань ложится точно на верхний край первой секции. Плашка на 1px ниже,
+// чтобы не было волосного шва.
+// Ширина 380px: логотип 311px + pl-6, скос начинается сразу за логотипом
+// и заканчивается до начала меню (навигация не перекрывается).
+const LOGO_PLATE_VIEWBOX = "0 0 380 95"
+const LOGO_PLATE_PATH = "M 0 95 V 22 Q 0 0 22 0 H 335 C 350 0 365 95 380 95 Z"
+
+
 export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
     (
         {
@@ -134,7 +147,21 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 {...props}
             >
                 <Container>
-                    <div className={cn("flex min-h-21.25 py-2 max-w-screen-2xl items-center justify-between", isMobile && 'bg-[#2C2C31] rounded-[15px]', user && "bg-[#2C2C31] px-6 md:px-7.5 rounded-[20px]", className )}>
+                    <div className={cn("relative flex min-h-21.25 py-2 max-w-screen-2xl items-center justify-between", isMobile && 'bg-[#2C2C31] rounded-[15px]', user && "bg-[#2C2C31] px-6 md:px-7.5 rounded-[20px]", className )}>
+                        {/* Белая обёртка логотипа: только десктоп и неавторизованное
+                            состояние (на мобилке шапка — тёмная плашка в обоих состояниях).
+                            -z-10: плашка под логотипом, но поверх фона страницы */}
+                        {!user && !isMobile && (
+                            <svg
+                                aria-hidden
+                                viewBox={LOGO_PLATE_VIEWBOX}
+                                preserveAspectRatio="none"
+                                className="pointer-events-none absolute left-0 top-0 -z-10 hidden h-[calc(100%+1px)] w-95 drop-shadow-sm md:block"
+                            >
+                                <path d={LOGO_PLATE_PATH} fill="#ffffff" />
+                            </svg>
+                        )}
+
                         {/* Left side */}
                         <div className="flex items-center gap-2">
                             {isMobile && (
@@ -182,17 +209,21 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                                         </Link>
                                     </>
                                 ) : (
-                                    <>
-                                        <Link href="/" className="flex items-center shrink-0">
-                                            <Image
-                                                src={user ? "/logoAuth.png" : "/logo.png"}
-                                                alt="logo-text"
-                                                width={user ? 173 : 311}
-                                                height={user ? 65 : 79}
-                                                priority
-                                            />
-                                        </Link>
-                                    </>
+                                    <Link
+                                        href="/"
+                                        className={cn("flex items-center shrink-0", !user && "md:pl-6")}
+                                    >
+                                        <Image
+                                            src={user ? "/logoAuth.png" : "/logo.png"}
+                                            alt="logo-text"
+                                            width={user ? 173 : 311}
+                                            height={user ? 65 : 79}
+                                            priority
+                                            // Штатный вордмарк лежит в файле белым, поэтому на
+                                            // белой обёртке он перекрашивается в чёрный (brightness-0)
+                                            className={!user ? "md:brightness-0" : undefined}
+                                        />
+                                    </Link>
                                 )}
 
                                 {/* Navigation menu */}
