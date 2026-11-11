@@ -66,7 +66,7 @@ export function Footer () {
                            <p className={"text-xs"}>Адрес: ул. Братская 14 Спортивный зал Адреналин</p>
                            <p className={"text-xs"}>ул. 50 лет ВЛКСМ Д.5</p>
                            <p className={"text-xs"}>Email: <Link href={'mailto:edalinb@mail.ru'} target={"_blank"}>edalinb@mail.ru</Link></p>
-                           <p className={"text-xs"}>Номер телефона: +375 (29) 535 2079</p>
+                           <p className={"text-xs"}>Номер телефона: +375 (29) 535 2097</p>
                             <CallbackDialog
                                 trigger={
                                     <Button className={'px-6.25 py-3.75 rounded-[13px] text-sm'}>Заказать звонок</Button>
@@ -147,7 +147,7 @@ export function Footer () {
                             <p className={"text-[16px]"}>Email: <Link href={'mailto:edalinb@mail.ru'}
                                                                       target={"_blank"}>edalinb@mail.ru</Link></p>
                             <p className={"text-[16px]"}>Номер телефона:<br/>
-                                +375 (29) 535 2079</p>
+                                +375 (29) 535 2097</p>
                             <CallbackDialog
                                 trigger={
                                     <Button className={'px-6.25 py-3.75 rounded-[13px] text-[14px]'}>Заказать звонок</Button>
