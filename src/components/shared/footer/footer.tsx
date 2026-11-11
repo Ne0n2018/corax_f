@@ -32,7 +32,7 @@ export function Footer () {
                                <p className={"text-sm"}>
                                    ИП Креер Эдгар Викторович<br/>
                                    УНП 791354984<br/>
-                                   Могилевская обл., г. Бобруйск, ул.<br/>
+                                   Могилевская обл., г. Бобруйск, ул. 50 лет ВЛКСМ Д.5<br/>
                                    BY36ALFA30132E83210010270000<br/>
                                    ЗАО “Альфа-Банк”<br/>
                                </p>
@@ -63,8 +63,8 @@ export function Footer () {
                        </div>
                        <div className={'flex flex-col gap-2 mt-3.75'}>
                            <h2 className={'text-xl font-bold'}>Контакты</h2>
-                           <p className={"text-xs"}>Адрес: ул. Братская 14 Спортивный зал Адреналин</p>
-                           <p className={"text-xs"}>ул. 50 лет ВЛКСМ Д.5</p>
+                           <p className={"text-xs"}>Адрес: Ул. Братская 14 фитнес клуб адреналин</p>
+                           <p className={"text-xs"}>Ул. Жозефа Алфёрова 14 Фитнес клуб адреналин</p>
                            <p className={"text-xs"}>Email: <Link href={'mailto:edalinb@mail.ru'} target={"_blank"}>edalinb@mail.ru</Link></p>
                            <p className={"text-xs"}>Номер телефона: +375 (29) 535 2097</p>
                             <CallbackDialog
@@ -105,7 +105,7 @@ export function Footer () {
                             <p className={"mt-5 font-[16px]"}>
                                 ИП Креер Эдгар Викторович<br/>
                                 УНП 791354984<br/>
-                                Могилевская обл., г. Бобруйск, ул.<br/>
+                                Могилевская обл., г. Бобруйск, ул. 50 лет ВЛКСМ Д.5<br/>
                                 BY36ALFA30132E83210010270000<br/>
                                 ЗАО “Альфа-Банк”<br/>
                             </p>
@@ -141,9 +141,9 @@ export function Footer () {
                         </div>
                         <div className={'flex flex-col justify-around '}>
                             <h2 className={'font-bold'}>Контакты</h2>
-                            <p className={"text-[16px]"}>Адрес: ул. Братская 14 <br/>
-                                Спортивный зал Адреналин</p>
-                            <p className={"text-[16px]"}>ул. 50 лет ВЛКСМ Д.5</p>
+                            <p className={"text-[16px]"}>Адрес: Ул. Братская 14 <br/>
+                                фитнес клуб адреналин</p>
+                            <p className={"text-[16px]"}>Ул. Жозефа Алфёрова 14 Фитнес клуб адреналин</p>
                             <p className={"text-[16px]"}>Email: <Link href={'mailto:edalinb@mail.ru'}
                                                                       target={"_blank"}>edalinb@mail.ru</Link></p>
                             <p className={"text-[16px]"}>Номер телефона:<br/>

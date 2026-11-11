@@ -29,10 +29,10 @@ export function Contacts() {
                 <div>
                     <h3 className="text-xl font-semibold mb-1 sm:mb-2">Адрес магазина</h3>
                     <p className="font-semibold text-sm  leading-snug">
-                        ул. Братская 14 Находится в спортивный зале “Адреналин”
+                        ул. Братская 14 Находится в фитнес клубе “Адреналин”
                     </p>
                     <p className="font-semibold text-sm  leading-snug">
-                        ул. 50 лет ВЛКСМ Д.5
+                       Ул. Жозефа Алфёрова 14 Находится в Фитнес клуб “Адреналин”
                     </p>
                 </div>
 
@@ -61,7 +61,7 @@ export function Contacts() {
                     <div className="font-semibold text-sm  space-y-0.5 leading-snug">
                         <p>ИП Креер Эдгар Викторович</p>
                         <p>УНП 791354984</p>
-                        <p>Могилевская обл., г. Бобруйск, ул.</p>
+                        <p>Могилевская обл., г. Бобруйск, ул. 50 лет ВЛКСМ Д.5</p>
                         <p className="break-all sm:break-normal">BY36ALFA30132E83210010270000</p>
                         <p>ЗАО “Альфа-Банк”</p>
                     </div>
