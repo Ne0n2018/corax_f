@@ -64,7 +64,8 @@ export function Footer () {
                        <div className={'flex flex-col gap-2 mt-3.75'}>
                            <h2 className={'text-xl font-bold'}>Контакты</h2>
                            <p className={"text-xs"}>Адрес: ул. Братская 14 Спортивный зал Адреналин</p>
-                           <p className={"text-xs"}>Email: <Link href={'mailto:info@gmail.com'} target={"_blank"}>info@gmail.com</Link></p>
+                           <p className={"text-xs"}>ул. 50 лет ВЛКСМ Д.5</p>
+                           <p className={"text-xs"}>Email: <Link href={'mailto:edalinb@mail.ru'} target={"_blank"}>edalinb@mail.ru</Link></p>
                            <p className={"text-xs"}>Номер телефона: +375 (29) 535 2079</p>
                             <CallbackDialog
                                 trigger={
@@ -72,12 +73,15 @@ export function Footer () {
                                 }
                             />
                        </div>
-                       <div className={'flex flex-col gap-2 mt-3.75'}>
-                           <h2 className={'font-bold text-xl text-center'}>Режим работы</h2>
-                           <p className={'text-[14px] text-center'}>Понедельник - пятница: 10:00-23:00</p>
-                           <p className={'text-[14px] text-center'}>Суббота - воскресенье: 9:00 - 21:00</p>
-                       </div>
-                        <div className={'border border-white w-82.75 mx-auto mt-5'}/>
+                        <div className={'flex flex-col gap-2 mt-3'}>
+                            <h2 className={'font-bold text-xl text-center'}>Режим работы</h2>
+                            <p className={'text-[14px] text-center'}>Понедельник - пятница: 10:00-23:00</p>
+                            <p className={'text-[14px] text-center'}>Суббота - воскресенье: 9:00 - 21:00</p>
+                        </div>
+                        <div className="mt-4 overflow-x-auto overflow-y-hidden rounded-[13px] bg-white px-3 pt-2.5 pb-3 pretty-scrollbar-on-light">
+                            <Image src="/paid.png" alt="Способы оплаты" width={13637} height={1377} className="h-14 w-auto max-w-none"/>
+                        </div>
+                         <div className={'border border-white w-82.75 mx-auto mt-4'}/>
                         <div className={"flex justify-center mt-3.75"}>
                             <Link
                                 href={PRIVACY_POLICY_URL}
@@ -91,9 +95,9 @@ export function Footer () {
                    </div>
 
                </>
-                ) : (
+                 ) : (
                 <>
-                    <div className={'flex justify-around  py-7.5'}>
+                    <div className={'flex justify-around py-5'}>
                         <div>
                             <Link href={'/'}>
                                 <Image src={'/footerLogo.png'} alt={'footer-logo'} width={337} height={127}/>
@@ -139,8 +143,9 @@ export function Footer () {
                             <h2 className={'font-bold'}>Контакты</h2>
                             <p className={"text-[16px]"}>Адрес: ул. Братская 14 <br/>
                                 Спортивный зал Адреналин</p>
-                            <p className={"text-[16px]"}>Email: <Link href={'mailto:info@gmail.com'}
-                                                                      target={"_blank"}>info@gmail.com</Link></p>
+                            <p className={"text-[16px]"}>ул. 50 лет ВЛКСМ Д.5</p>
+                            <p className={"text-[16px]"}>Email: <Link href={'mailto:edalinb@mail.ru'}
+                                                                      target={"_blank"}>edalinb@mail.ru</Link></p>
                             <p className={"text-[16px]"}>Номер телефона:<br/>
                                 +375 (29) 535 2079</p>
                             <CallbackDialog
@@ -150,8 +155,14 @@ export function Footer () {
                             />
                         </div>
                     </div>
+                    {/* Платёжные логотипы: тёмные на прозрачном фоне → белая подложка */}
+                    <div className="flex justify-center px-6 py-4">
+                        <div className="w-full max-w-150 rounded-[13px] bg-white px-8 py-3">
+                            <Image src="/paid.png" alt="Способы оплаты" width={13637} height={1377} className="h-auto w-full" sizes="(max-width: 1024px) 100vw, 600px"/>
+                        </div>
+                    </div>
                     <div className={'w-300  mx-auto border border-solid border-white'}/>
-                    <div className={'flex flex-col items-center gap-2 mt-7.5 mb-9.25'}>
+                    <div className={'flex flex-col items-center gap-2 mt-5 mb-7.5'}>
                         <p className={'text-[16px]'}>Доставка по всему Минску</p>
                         <Link
                             href={PRIVACY_POLICY_URL}

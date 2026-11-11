@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {Category, CategoryCreate, SubCategory} from "@/types/category";
+import {Category, CategoryCreate, PublicCategory, SubCategory} from "@/types/category";
 import {api} from "@/lib/api";
 import {toast} from "sonner";
 
@@ -8,10 +8,12 @@ interface CategoryStore {
     isLoading: boolean;
     error: string | null;
     category: SubCategory[]; // Для селектов (getForSelect)
-    categories: Category[]; // Для каталога категорий с подкатегориями
+    categories: Category[]; // Для каталога категорий с подкатегориями (админка)
+    publicCategories: PublicCategory[]; // Публичный список категорий (каталог для гостей)
 
     getForSelect: () => Promise<void>;
     fetchCategories: (name?: string) => Promise<void>;
+    fetchPublicCategories: () => Promise<void>;
     adminCreate: (data?: CategoryCreate) => Promise<boolean>;
     adminUpdate: (id: string, data: any) => Promise<boolean>;
     getCategoriesById: (id: string) => Promise<void>;
@@ -24,6 +26,20 @@ export const useCategoryStore = create<CategoryStore>((set) => ({
     error: null,
     category: [],
     categories: [],
+    publicCategories: [],
+
+    // Публичный метод: GET /category — доступен без авторизации (для каталога)
+    fetchPublicCategories: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.get<PublicCategory[]>("/category");
+            set({ isLoading: false, error: null, publicCategories: response.data });
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.message || "Ошибка загрузки категорий";
+            set({ isLoading: false, error: errorMessage });
+            toast.error(errorMessage);
+        }
+    },
 
     // Метод для получения всех категорий с подкатегориями (для дерева категорий)
     fetchCategories: async (name?: string) => {

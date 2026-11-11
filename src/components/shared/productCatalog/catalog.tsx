@@ -5,6 +5,8 @@ import {Skeleton} from "@/components/ui/skeleton";
 import Image from "next/image";
 import {Heart} from "lucide-react";
 import {useFavoriteStore} from "@/store/favorite.store";
+import {useUserStore} from "@/store/user.store";
+import {requireAuth} from "@/lib/require-auth";
 import Link from "next/link";
 import type {MouseEvent} from "react";
 
@@ -16,6 +18,7 @@ interface CatalogProps {
 export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogProps) {
     const { isLoading, getForCatalog, userProducts, userNextCursor, isFetchingMore } = useProductStore();
     const { isLoading: favoriteLoading, addToFavorite, getFavorite, deleteFavorite, favoriteProductId } = useFavoriteStore();
+    const isAuth = useUserStore((s) => s.isAuth);
     const observerTarget = useRef<HTMLDivElement | null>(null);
 
     // 1. Загружаем товары при монтировании и изменении фильтров.
@@ -25,9 +28,12 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
     }, [getForCatalog, currentSearch, currentSubCategoryId]);
 
     // Избранное не зависит от фильтров каталога — грузим отдельно
+    // (только если авторизован — иначе запрос вернёт 401)
     useEffect(() => {
-        getFavorite();
-    }, [getFavorite]);
+        if (isAuth) {
+            getFavorite();
+        }
+    }, [isAuth, getFavorite]);
 
     // 2. Настройка бесконечной загрузки
     useEffect(() => {
@@ -60,10 +66,20 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
         e.preventDefault();
         e.stopPropagation();
 
+        if (!requireAuth("Чтобы добавлять товары в избранное, войдите в аккаунт")) return;
+
         if (isFavorite) {
             deleteFavorite(productId);
         } else {
             addToFavorite(productId);
+        }
+    };
+
+    // Клик по карточке товара — блокируем открытие модалки для неавторизованных:
+    // обрываем навигацию Link, requireAuth сам покажет тост с кнопкой «Войти».
+    const handleProductClick = (e: MouseEvent) => {
+        if (!requireAuth("Чтобы посмотреть карточку товара, войдите в аккаунт")) {
+            e.preventDefault();
         }
     };
 
@@ -143,7 +159,7 @@ export function Catalog({ currentSearch = '', currentSubCategoryId }: CatalogPro
                                     : false;
 
                                 return (
-                                    <Link href={`/catalog/${product.id}`} key={product.id} className={"bg-white rounded-2xl border border-gray-100 p-3 md:p-4 flex flex-col justify-between hover:shadow-md transition-shadow group relative bloc"} scroll={false}>
+                                    <Link href={`/catalog/${product.id}`} key={product.id} className={"bg-white rounded-2xl border border-gray-100 p-3 md:p-4 flex flex-col justify-between hover:shadow-md transition-shadow group relative bloc"} scroll={false} onClick={handleProductClick}>
                                         <div
                                         >
                                             <button

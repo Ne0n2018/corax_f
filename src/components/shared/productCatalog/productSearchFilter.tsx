@@ -21,11 +21,11 @@ export function ProductSearchFilter() {
     // Какие категории развернуты вручную (нет значения — решение по выбранной подкатегории)
     const [openedCategories, setOpenedCategories] = useState<Record<string, boolean>>({});
 
-    const { categories, fetchCategories } = useCategoryStore();
+    const { publicCategories, fetchPublicCategories } = useCategoryStore();
 
     useEffect(() => {
-        fetchCategories();
-    }, [fetchCategories]);
+        fetchPublicCategories();
+    }, [fetchPublicCategories]);
 
     useEffect(() => {
         setSearchQuery(urlName);
@@ -104,13 +104,13 @@ export function ProductSearchFilter() {
                 </div>
 
                 {/* Список категорий */}
-                {categories && categories.length > 0 && (
+                {publicCategories && publicCategories.length > 0 && (
                     <div
                         className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 overflow-hidden transition-all duration-300 ${
                             isExpanded ? "max-h-500 opacity-100 mb-4" : "max-h-55 md:max-h-45 opacity-90"
                         }`}
                     >
-                        {categories.map((category) => {
+                        {publicCategories.map((category) => {
                             const subList = category.SubCategory || [];
                             const selectedIndex = subList.findIndex((sub) => sub.id === selectedSubCategoryId);
                             // Если выбранная подкатегория спрятана — раскрываем список автоматически

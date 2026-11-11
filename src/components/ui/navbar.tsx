@@ -9,16 +9,16 @@ import {cn} from "@/lib/utils"
 import {AuthDialog, AuthModal} from "@/components/shared/header/auth.dialog"
 import {Container} from "@/components/ui/container"
 import {useUserStore} from "@/store/user.store"
+import {useAuthModalStore} from "@/store/auth-modal.store"
 import Link from "next/link"
 import {usePathname} from "next/navigation"
 import Image from "next/image"
 import {ArrowDown, UserRound} from "lucide-react"
+import {openAuthDialog} from "@/lib/require-auth"
 import {AccountDialog, AccountModal} from "@/components/shared/header/account.dialog"
 import {CartSheet} from "@/components/shared/cart/cart-sheet"
 import {useCartStore} from "@/store/cart.store"
 import useIsMobile from "@/hooks/use-is-mobile"
-import {toast} from "sonner"
-import {isAuthBlockedByCookieConsent, useCookieConsentStore} from "@/store/cookie-consent.store"
 import {useNotificationStore} from "@/store/notification.store"
 import {NotificationBadge} from "@/components/shared/notification-badge"
 
@@ -106,7 +106,11 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         ref,
     ) => {
         const [accountMode, setAccountMode] = useState<AccountModal>(null)
-        const [authMode, setAuthMode] = useState<AuthModal>(null)
+        // Диалог авторизации управляется глобальным стором: его может открыть
+        // не только шапка, но и тост-предупреждение из requireAuth()
+        const authMode = useAuthModalStore((state) => state.mode)
+        const openAuth = useAuthModalStore((state) => state.openAuth)
+        const closeAuth = useAuthModalStore((state) => state.closeAuth)
         const [isCartOpen, setIsCartOpen] = useState(false)
         // Контролируемое мобильное меню, чтобы закрывать его при выборе пункта
         const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -126,16 +130,9 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
 
         const cartTotalItems = cart?.CartItem?.reduce((acc, item) => acc + item.quantity, 0) || 0
 
-        // Отказ от cookie-файлов блокирует вход и регистрацию
-        const handleAuthClick = (mode: AuthModal) => {
-            if (isAuthBlockedByCookieConsent()) {
-                toast.error("Чтобы войти в аккаунт, примите использование cookie-файлов")
-                // Показываем плашку заново, чтобы пользователь мог изменить решение
-                useCookieConsentStore.getState().resetConsent()
-                return
-            }
-            setAuthMode(mode)
-        }
+        // Отказ от cookie-файлов блокирует вход и регистрацию — проверку
+        // делает общий хелпер, тот же путь использует тост requireAuth()
+        const handleAuthClick = (mode: AuthModal) => openAuthDialog(mode)
 
         return (
             <header
@@ -303,8 +300,8 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
 
                             <AuthDialog
                                 mode={authMode}
-                                onModeChange={(newMode) => setAuthMode(newMode)}
-                                onClose={() => setAuthMode(null)}
+                                onModeChange={(newMode) => openAuth(newMode)}
+                                onClose={closeAuth}
                             />
                             <AccountDialog
                                 mode={accountMode}

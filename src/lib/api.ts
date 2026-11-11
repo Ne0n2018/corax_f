@@ -11,21 +11,33 @@ export const api = axios.create({
 
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
         // Получаем оригинальную конфигурацию запроса
         const originalRequest = error.config;
 
         if (error.response?.status === 401) {
             // ПРОВЕРКА: Если это запрос на проверку сессии, просто возвращаем ошибку
-            // Укажи здесь точный путь к твоему эндпоинту me (например, '/auth/me' или '/users/me')
             if (originalRequest.url?.includes('/users/profile')) {
                 return Promise.reject(error);
             }
 
-            // Для остальных эндпоинтов (если пользователь был авторизован, но сессия истекла)
+            // Для остальных эндпоинтов: сбрасываем сессию локально и показываем
+            // тост с кнопкой «Войти» — вместо жёсткого редиректа, который терял
+            // бы пользователя с произвольной страницы.
+            // Динамические импорты разрывают цикл api ↔ сторы.
             if (typeof window !== 'undefined') {
-                // Опционально: вместо жесткого редиректа лучше вызывать функцию logout из стора
-                window.location.href = '/';
+                const [{useUserStore}, {toast}, {openAuthDialog}] = await Promise.all([
+                    import("@/store/user.store"),
+                    import("sonner"),
+                    import("@/lib/require-auth"),
+                ]);
+                useUserStore.getState().logout();
+
+                toast.error("Сессия истекла, войдите заново", {
+                    description: "Ваша сессия истекла. Войдите, чтобы продолжить",
+                    action: {label: "Войти", onClick: () => openAuthDialog("Login")},
+                    duration: 10_000,
+                });
             }
         }
 

@@ -31,6 +31,9 @@ export function Contacts() {
                     <p className="font-semibold text-sm  leading-snug">
                         ул. Братская 14 Находится в спортивный зале “Адреналин”
                     </p>
+                    <p className="font-semibold text-sm  leading-snug">
+                        ул. 50 лет ВЛКСМ Д.5
+                    </p>
                 </div>
 
                 <div>
@@ -43,7 +46,7 @@ export function Contacts() {
 
                 <div>
                     <h3 className="text-xl font-semibold mb-1 sm:mb-2">Email</h3>
-                    <p className="font-semibold text-sm ">info@gmail.com</p>
+                    <Link className="font-semibold text-sm " href={"mailto:edalinb@mail.ru"}>edalinb@mail.ru</Link>
                 </div>
 
                 <div>

@@ -9,6 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {SectionTab} from "@/components/shared/main/sectionTab";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface SecondSectionProps {
     className?: string;
@@ -16,6 +17,7 @@ interface SecondSectionProps {
 
 export function SecondSection({className}:SecondSectionProps) {
     const { isLoading, topProducts, getTopProducts } = useTopProductStore();
+    const router = useRouter();
 
     useEffect(() => {
         getTopProducts();
@@ -44,7 +46,7 @@ export function SecondSection({className}:SecondSectionProps) {
                         Самые популярные и востребованные товары этого сезона, проверенные временем и нашей аудиторией
                     </p>
 
-                    <Button className="w-full md:w-auto mt-2 text-black bg-white hover:bg-gray-100 rounded-2xl md:rounded-[13px] px-8 py-3.5 font-medium transition-colors cursor-pointer text-sm md:text-base">
+                    <Button onClick={()=> router.push('/catalog')} className="w-full md:w-auto mt-2 text-black bg-white hover:bg-gray-100 rounded-2xl md:rounded-[13px] px-8 py-3.5 font-medium transition-colors cursor-pointer text-sm md:text-base">
                         Узнать больше
                     </Button>
                 </div>

@@ -184,3 +184,34 @@
   background-color: rgba(255, 255, 255, 0.38);
   background-clip: content-box;
 }
+
+/* Тот же скроллбар для светлых подложек (белая плашка платёжных логотипов):
+   бегунок затемнён, иначе белый на белом не видно */
+.pretty-scrollbar-on-light {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(44, 44, 49, 0.28) transparent;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pretty-scrollbar-on-light::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.pretty-scrollbar-on-light::-webkit-scrollbar-track {
+  background: transparent;
+  margin-inline: 6px;
+}
+
+.pretty-scrollbar-on-light::-webkit-scrollbar-thumb {
+  background-color: rgba(44, 44, 49, 0.28);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.pretty-scrollbar-on-light::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(44, 44, 49, 0.45);
+  background-clip: content-box;
+}

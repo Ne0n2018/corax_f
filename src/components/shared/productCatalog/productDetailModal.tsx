@@ -10,6 +10,7 @@ import {useCartStore} from '@/store/cart.store'
 import {ProductOption} from "@/types/products"
 import {AddToCart} from "@/types/cart"
 import { useRouter } from 'next/navigation'
+import {requireAuth} from "@/lib/require-auth"
 
 interface ProductDetailModalProps {
     productId: string
@@ -94,6 +95,7 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
     }, [currentUserProduct?.id])
 
     const handleFavoriteToggle = () => {
+        if (!requireAuth("Чтобы добавлять товары в избранное, войдите в аккаунт")) return
         if (isFavorite) {
             deleteFavorite(productId)
         } else {
@@ -137,17 +139,11 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
     const totalPrice = unitPrice * quantity
     const tasteLabel = currentUserProduct?.isClothes ? 'Цвет' : 'Вкус'
 
-    // Переход сразу к оформлению заказа.
-    // replace, а не push: запись /catalog/[id] в истории заменяется на /cart —
-    // «модальной» страницы в стеке не остаётся и back ведёт в каталог.
-    // Слот @modal при мягкой навигации сохраняет модалку — её скрывает
-    // pathname-защита в @modal/catalog/[id]/page.tsx.
-    const handleBuyNow = () => {
-        router.replace('/cart')
-    }
+  
 
     // Добавление в корзину (отправляем столько раз, сколько выбрано единиц товара)
     const handleAddToCart = async () => {
+        if (!requireAuth("Чтобы добавлять товар в корзину, войдите в аккаунт")) return
         if (!currentUserProduct?.id) return;
 
         const sizeName = selectedSize?.name || (sizes.length > 0 ? sizes[0].name : 'Стандартный');
@@ -357,13 +353,7 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
                                 {isSubmittingCart ? 'Добавление...' : 'В корзину'}
                             </button>
 
-                            <button
-                                type="button"
-                                onClick={handleBuyNow}
-                                className="flex-1 min-w-35 bg-[#D83C2D] hover:bg-[#c23325] text-white font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl transition-colors text-center"
-                            >
-                                Приобрести товар
-                            </button>
+
                         </div>
                     </div>
                 </div>
