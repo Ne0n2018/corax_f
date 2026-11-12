@@ -149,9 +149,9 @@ export function ProductDetailModal({ productId, isOpen, onClose, onSelectProduct
         const sizeName = selectedSize?.name || (sizes.length > 0 ? sizes[0].name : 'Стандартный');
         const tasteName = selectedTaste?.name || (tastes.length > 0 ? tastes[0].name : 'Стандартный');
 
+        // Цену не отправляем — сервер сам считает её по прайсу (default_price + наценки)
         const dto: AddToCart = {
             productId: currentUserProduct.id,
-            price: unitPrice,
             taste: tasteName,
             size: sizeName,
         };

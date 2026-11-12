@@ -103,10 +103,25 @@ export interface OrderResponse {
     totalAmount: number;
     subtotalAmount: number;
     discountAmount: number;
-    deliveryPrice: number;
+    /** Финальное поле доставки (POST /order, GET /order/:id) */
+    deliveryCost?: number | null;
+    /** Устаревшее имя поля — оставлено для обратной совместимости с админ-панелью */
+    deliveryPrice?: number;
     promoCode?: string;
     items?: OrderItem[];
     createdAt?: string;
+}
+
+/**
+ * Раскладка итога из ответа сервера. Всегда показывайте все четыре поля
+ * в UI карточки заказа, чтобы пользователь понимал, откуда взялась сумма.
+ */
+export function getOrderAmounts(order: OrderResponse) {
+    const subtotal = order.subtotalAmount;
+    const discount = order.discountAmount;
+    const delivery = order.deliveryCost ?? order.deliveryPrice ?? 0;
+    const total = order.totalAmount;
+    return { subtotal, discount, delivery, total };
 }
 
 export interface CreateOrderResult {

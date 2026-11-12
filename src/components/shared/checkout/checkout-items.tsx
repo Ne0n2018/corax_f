@@ -95,7 +95,7 @@ export function CheckoutItems({
                             {/* Информация о товаре */}
                             <div className="flex-1 min-w-0">
                                 <div className="text-sm sm:text-base font-bold text-gray-900 mb-0.5">
-                                    {Number(item.productItem.price).toFixed(2)} р.
+                                    {item.productItem.price !== null ? Number(item.productItem.price).toFixed(2) + ' р.' : 'Нет в прайсе'}
                                 </div>
                                 <h4 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-1">
                                     {product?.name}

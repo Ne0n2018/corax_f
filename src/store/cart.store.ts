@@ -61,21 +61,16 @@ export const useCartStore = create<useCartStoreProps>((set, get) => ({
             return get().removeFromCart(cartItemId);
         }
 
-        // Оптимистичное обновление, чтобы интерфейс реагировал мгновенно и не стирал состояние
+        // Оптимистично меняем только количество, чтобы кнопка реагировала мгновенно.
+        // Сумму не пересчитываем локально — её всегда возвращает сервер в GET /cart.
         const currentCart = get().cart;
         if (currentCart && currentCart.CartItem) {
-            const updatedItems = currentCart.CartItem.map((item) =>
-                item.id === cartItemId ? { ...item, quantity } : item
-            );
-            const updatedTotal = updatedItems.reduce(
-                (sum, item) => sum + item.productItem.price * item.quantity,
-                0
-            );
             set({
                 cart: {
                     ...currentCart,
-                    CartItem: updatedItems,
-                    totalAmount: updatedTotal,
+                    CartItem: currentCart.CartItem.map((item) =>
+                        item.id === cartItemId ? { ...item, quantity } : item
+                    ),
                 },
                 isUpdating: true,
                 error: null,
@@ -95,19 +90,13 @@ export const useCartStore = create<useCartStoreProps>((set, get) => ({
     },
 
     removeFromCart: async (cartItemId: string) => {
-        // Оптимистичное удаление
+        // Оптимистично убираем позицию из списка, сумму не трогаем — сервер пересчитает её в GET /cart
         const currentCart = get().cart;
         if (currentCart && currentCart.CartItem) {
-            const updatedItems = currentCart.CartItem.filter((item) => item.id !== cartItemId);
-            const updatedTotal = updatedItems.reduce(
-                (sum, item) => sum + item.productItem.price * item.quantity,
-                0
-            );
             set({
                 cart: {
                     ...currentCart,
-                    CartItem: updatedItems,
-                    totalAmount: updatedTotal,
+                    CartItem: currentCart.CartItem.filter((item) => item.id !== cartItemId),
                 },
                 isUpdating: true,
                 error: null,
@@ -130,8 +119,16 @@ export const useCartStore = create<useCartStoreProps>((set, get) => ({
     clearCart: async () => {
         const currentCart = get().cart;
         if (currentCart) {
+            // Пустая корзина — нулевые суммы ожидаемы, но итог всё равно придёт из GET /cart
             set({
-                cart: { ...currentCart, CartItem: [], totalAmount: 0 },
+                cart: {
+                    ...currentCart,
+                    CartItem: [],
+                    totalAmount: 0,
+                    discountAmount: 0,
+                    finalAmount: 0,
+                    appliedPromotions: [],
+                },
                 isUpdating: true,
                 error: null,
             });

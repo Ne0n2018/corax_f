@@ -6,12 +6,14 @@ import {Container} from '@/components/ui/container'
 import {useCartStore} from '@/store/cart.store'
 import {useUserStore} from '@/store/user.store'
 import {useOrderStore} from '@/store/order.store'
-import {DeliveryType, PaymentType} from '@/types/order'
+import {DeliveryType, OrderResponse, PaymentType} from '@/types/order'
 import {CheckoutItems} from '@/components/shared/checkout/checkout-items'
 import {CheckoutDelivery} from '@/components/shared/checkout/checkout-delivery'
 import {CheckoutPayment} from '@/components/shared/checkout/checkout-payment'
 import {CheckoutPromo} from '@/components/shared/checkout/checkout-promo'
 import {CheckoutSummary} from '@/components/shared/checkout/checkout-summary'
+import {OrderAmountBreakdown} from '@/components/shared/checkout/order-amount-breakdown'
+import {getDeliveryCost} from '@/lib/delivery-cost'
 import {ArrowLeft, CheckCircle2, ShoppingBag} from 'lucide-react'
 import {toast} from 'sonner'
 
@@ -32,6 +34,7 @@ export default function CartCheckoutPage() {
     const [promoDiscount, setPromoDiscount] = useState<number>(0)
     const [isOrderCompleted, setIsOrderCompleted] = useState<boolean>(false)
     const [completedOrderId, setCompletedOrderId] = useState<string>('')
+    const [createdOrder, setCreatedOrder] = useState<OrderResponse | null>(null)
 
     // Загрузка корзины при монтировании (профиль уже загружен AppLoader)
     useEffect(() => {
@@ -75,38 +78,24 @@ export default function CartCheckoutPage() {
 
     const items = cart?.CartItem || []
     const selectedItems = items.filter((item) => selectedItemIds.includes(item.id))
+    const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0)
 
-    // Сумма за выбранные товары
-    const selectedSubtotal = selectedItems.reduce(
-        (acc, item) => acc + item.productItem.price * item.quantity,
-        0
-    )
-    const totalQuantity = selectedItems.reduce((acc, item) => acc + item.quantity, 0)
+    // Итоги корзины — только из ответа сервера. Бэкенд оформляет в заказ
+    // всю корзину, поэтому сумма всегда считается по всем позициям,
+    // а не по отмеченным чекбоксами.
+    const subtotalAmount = cart?.totalAmount || 0
+    const promotionDiscount = cart?.discountAmount || 0
+    const cartFinalAmount = cart?.finalAmount ?? Math.max(0, subtotalAmount - promotionDiscount)
 
-    // Скидка из промоакций бэкенда (пропорционально выбранным товарам)
-    const totalCartAmount = cart?.totalAmount || 0
-    const serverDiscount = cart?.discountAmount || 0
-    const promotionDiscount = totalCartAmount > 0
-        ? Math.round(((serverDiscount * selectedSubtotal) / totalCartAmount) * 100) / 100
-        : serverDiscount
+    // Общая скидка: акции из корзины + оценка по промокоду, не больше суммы товаров
+    const totalDiscount = Math.min(subtotalAmount, promotionDiscount + promoDiscount)
 
-    // Общая скидка = промоакции + промокод
-    const totalDiscount = Math.min(selectedSubtotal, promotionDiscount + promoDiscount)
+    // Доставка по тарифу бэкенда — только для предпросмотра.
+    // Финальную стоимость доставки возвращает POST /order в поле deliveryCost.
+    const deliveryCost = getDeliveryCost(deliveryType)
 
-    // Стоимость доставки
-    const getDeliveryPrice = () => {
-        if (selectedItems.length === 0) return 0
-        switch (deliveryType) {
-            case DeliveryType.PICKUP:
-                return 0
-            case DeliveryType.EUROMAIL:
-                return 5
-            case DeliveryType.DELIVERY:
-            default:
-                return 15
-        }
-    }
-    const deliveryPrice = getDeliveryPrice()
+    // Предпросмотр итога с учётом доставки (не финальная цифра)
+    const previewTotal = Math.max(0, subtotalAmount - totalDiscount) + deliveryCost
 
     // Переключение выбора товара
     const handleToggleSelect = (id: string) => {
@@ -136,7 +125,7 @@ export default function CartCheckoutPage() {
     const isAddressRequired = deliveryType !== DeliveryType.PICKUP
     const isEuromail = deliveryType === DeliveryType.EUROMAIL
     const canSubmit =
-        selectedItems.length > 0 &&
+        items.length > 0 &&
         (!isAddressRequired || (address && address.trim().length > 3)) &&
         (!isEuromail || (recipientName.trim().length >= 2 && recipientPhone.trim().length >= 7))
 
@@ -149,8 +138,8 @@ export default function CartCheckoutPage() {
                 toast.error('Для Европочты обязательно укажите ФИО получателя')
             } else if (isEuromail && (!recipientPhone.trim() || recipientPhone.trim().length < 7)) {
                 toast.error('Для Европочты обязательно укажите номер телефона получателя')
-            } else if (selectedItems.length === 0) {
-                toast.error('Выберите хотя бы один товар для оформления')
+            } else if (items.length === 0) {
+                toast.error('Корзина пуста. Добавьте товары перед оформлением заказа.')
             }
             return
         }
@@ -196,6 +185,7 @@ export default function CartCheckoutPage() {
 
             setIsOrderCompleted(true)
             setCompletedOrderId(result.order?.id || '')
+            setCreatedOrder(result.order || null)
             getCart()
             toast.success('Заказ успешно оформлен!')
         }
@@ -216,6 +206,14 @@ export default function CartCheckoutPage() {
                         Ваш заказ {completedOrderId ? `№${completedOrderId.slice(0, 8)}` : ''} успешно принят в обработку.
                         Мы свяжемся с вами для подтверждения доставки.
                     </p>
+
+                    {/* Суммы строго из ответа POST /order */}
+                    {createdOrder && (
+                        <div className="max-w-sm mx-auto bg-gray-50 rounded-2xl p-4 sm:p-5 border border-gray-100 text-left">
+                            <OrderAmountBreakdown order={createdOrder} totalLabel="К оплате" />
+                        </div>
+                    )}
+
                     <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
                         <Link
                             href="/catalog"
@@ -283,6 +281,14 @@ export default function CartCheckoutPage() {
                         onToggleSelect={handleToggleSelect}
                         onUpdateQuantity={handleUpdateQuantity}
                     />
+
+                    {/* Бэкенд оформляет в заказ всю корзину — чекбоксы не меняют сумму */}
+                    {selectedItems.length !== items.length && (
+                        <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                            В заказ попадут все товары корзины. Сумма рассчитывается по всему
+                            составу, снятие отметки ни на неё не влияет.
+                        </p>
+                    )}
                 </div>
 
                 {/* Правая колонка: Условия оформления заказа */}
@@ -313,7 +319,7 @@ export default function CartCheckoutPage() {
 
                         {/* 3. Промокод */}
                         <CheckoutPromo
-                            subtotal={selectedSubtotal}
+                            subtotal={subtotalAmount}
                             appliedCode={promoCode}
                             promoDiscount={promoDiscount}
                             onApplyPromo={handleApplyPromo}
@@ -322,9 +328,10 @@ export default function CartCheckoutPage() {
 
                         {/* 4. Итоговая сводка и кнопка оформления */}
                         <CheckoutSummary
-                            subtotal={selectedSubtotal}
+                            subtotal={subtotalAmount}
                             discount={totalDiscount}
-                            deliveryPrice={deliveryPrice}
+                            deliveryCost={deliveryCost}
+                            total={previewTotal}
                             totalQuantity={totalQuantity}
                             isSubmitting={isSubmitting}
                             canSubmit={canSubmit}

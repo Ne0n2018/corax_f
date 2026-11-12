@@ -6,7 +6,12 @@ import { Loader2 } from 'lucide-react'
 interface CheckoutSummaryProps {
     subtotal: number
     discount: number
-    deliveryPrice: number
+    deliveryCost: number
+    /**
+     * Итог для предпросмотра. Считается на странице из серверных полей корзины
+     * плюс тариф доставки; финальную сумму подтверждает ответ POST /order.
+     */
+    total: number
     totalQuantity: number
     isSubmitting: boolean
     canSubmit: boolean
@@ -16,14 +21,13 @@ interface CheckoutSummaryProps {
 export function CheckoutSummary({
     subtotal,
     discount,
-    deliveryPrice,
+    deliveryCost,
+    total,
     totalQuantity,
     isSubmitting,
     canSubmit,
     onSubmit,
 }: CheckoutSummaryProps) {
-    const finalTotal = Math.max(0, subtotal - discount) + deliveryPrice
-
     return (
         <div className="space-y-4 pt-4 border-t border-gray-100">
             {/* Итоговая сумма крупно */}
@@ -32,7 +36,7 @@ export function CheckoutSummary({
                     Итого
                 </span>
                 <span className="text-xl sm:text-2xl font-black text-gray-900">
-                    {finalTotal.toFixed(2)} р.
+                    {total.toFixed(2)} р.
                 </span>
             </div>
 
@@ -55,17 +59,24 @@ export function CheckoutSummary({
                 <div className="flex items-center justify-between">
                     <span className="text-gray-500">Скидка</span>
                     <span className={`font-semibold ${discount > 0 ? 'text-[#D83C2D]' : 'text-gray-900'}`}>
-                        {discount > 0 ? `-${discount.toFixed(2)} р.` : '0%'}
+                        {discount > 0 ? `-${discount.toFixed(2)} р.` : '0 р.'}
                     </span>
                 </div>
 
                 <div className="flex items-center justify-between">
                     <span className="text-gray-500">Доставка</span>
                     <span className="font-semibold text-gray-900">
-                        {deliveryPrice === 0 ? 'Бесплатно' : `${deliveryPrice.toFixed(2)} р.`}
+                        {deliveryCost > 0 ? `${deliveryCost.toFixed(2)} р.` : 'Бесплатно'}
                     </span>
                 </div>
+
+                {/* Скидка уменьшает только товары, доставку — никогда */}
+                <p className="text-[11px] text-gray-400 leading-relaxed pt-1">
+                    Итог может измениться после оформления — суммы пересчитывает сервер
+                    (цены по прайсу и точный размер скидок).
+                </p>
             </div>
+
 
             {/* Кнопка оформления заказа */}
             <button

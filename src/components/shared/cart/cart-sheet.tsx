@@ -52,25 +52,17 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
 
     // В шторке нет выбора отдельных позиций — в заказ идут все товары корзины
     const selectedItems = items
-    const selectedTotalAmount = selectedItems.reduce(
-        (acc, item) => acc + item.productItem.price * item.quantity,
-        0
-    )
+    // Итоги берём строго из ответа сервера — никаких локальных пересчётов
+    const totalCartAmount = cart?.totalAmount || 0
+    const serverDiscount = cart?.discountAmount || 0
+    const finalAmount = cart?.finalAmount ?? Math.max(0, totalCartAmount - serverDiscount)
+    const cartTotalItems = selectedItems.reduce((acc, item) => acc + item.quantity, 0)
 
     // Текущий товар для активного всплывающего меню трех точек
     const activeCartItem = items.find((item) => item.id === activeMenuCartItemId)
     const activeProduct = activeCartItem?.productItem.product
     const isItemFavorite = activeProduct ? favoriteProductId.includes(activeProduct.id) : false
     const isItemCompared = activeProduct ? comparisonProductIds.includes(activeProduct.id) : false
-    const cartTotalItems = selectedItems.reduce((acc, item) => acc + item.quantity, 0)
-
-    // Расчет реальной скидки из бэкенда (по акциям из promotion.service)
-    const totalCartAmount = cart?.totalAmount || 0
-    const serverDiscount = cart?.discountAmount || 0
-    const discount = totalCartAmount > 0
-        ? Math.round(((serverDiscount * selectedTotalAmount) / totalCartAmount) * 100) / 100
-        : serverDiscount
-    const finalAmount = Math.max(0, selectedTotalAmount - discount)
 
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -177,7 +169,7 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
                                     <div className="flex-1 min-w-0 pr-1">
                                         <div className="flex items-center justify-between gap-1 mb-0.5">
                                             <div className="text-xs sm:text-sm font-bold text-gray-900">
-                                                {Number(item.productItem.price).toFixed(2)} р.
+                                                {item.productItem.price !== null ? Number(item.productItem.price).toFixed(2) + ' р.' : 'Нет в прайсе'}
                                             </div>
 
                                             {/* Кнопка с тремя точками для открытия доп. меню */}
@@ -237,7 +229,7 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-[20px] font-semibold text-black">Итого</span>
                             <span className="text-[20px] font-semibold text-black">
-                                {(finalAmount + (selectedItems.length > 0 ? 15 : 0) + 15).toFixed(2)}  р.
+                                {finalAmount.toFixed(2)}  р.
                             </span>
                         </div>
 
@@ -248,21 +240,23 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
                             </div>
                             <div className="flex items-center justify-between">
                                 <span>Сумма за товары</span>
-                                <span>{selectedTotalAmount.toFixed(2)} р.</span>
+                                <span>{totalCartAmount.toFixed(2)} р.</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span>Скидка</span>
-                                <span className={discount > 0 ? "text-[#D83C2D] font-semibold" : ""}>
-                                    {discount > 0 ? `-${discount.toFixed(2)} р.` : "0 р."}
-                                </span>
-                            </div>
+                            {serverDiscount > 0 && (
+                                <div className="flex items-center justify-between">
+                                    <span>Скидка</span>
+                                    <span className="text-[#D83C2D] font-semibold">
+                                        -{serverDiscount.toFixed(2)} р.
+                                    </span>
+                                </div>
+                            )}
 
-                            {/* Список примененных акций из бэкенда */}
+                            {/* Список применённых акций из бэкенда */}
                             {cart?.appliedPromotions && cart.appliedPromotions.length > 0 && (
                                 <div className="py-1 space-y-0.5">
-                                    {cart.appliedPromotions.map((promo) => (
+                                    {cart.appliedPromotions.map((promo, idx) => (
                                         <div
-                                            key={promo.promotionId}
+                                            key={promo.promotionId ?? promo.name ?? idx}
                                             className="flex items-center justify-between text-xs text-[#D83C2D]/90 pl-2"
                                         >
                                             <span className="truncate max-w-50">
@@ -276,7 +270,7 @@ export function CartSheet({ isOpen, onOpenChange }: CartSheetProps) {
 
                             <div className="flex items-center justify-between font-medium text-gray-700 pt-0.5">
                                 <span>Доставка</span>
-                                <span>15 р.</span>
+                                <span>При оформлении</span>
                             </div>
                         </div>
 

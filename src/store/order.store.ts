@@ -112,9 +112,9 @@ export const useOrderStore = create<OrderState>((set) => ({
         let failed = 0;
 
         for (const item of orderItems) {
+            // Цену не отправляем — сервер сам считает её по прайсу
             const dto: AddToCart = {
                 productId: item.productId as string,
-                price: Number(item.price || 0),
                 taste: item.taste || 'Стандартный',
                 size: item.size || 'Стандартный',
             };

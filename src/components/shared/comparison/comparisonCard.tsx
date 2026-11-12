@@ -71,9 +71,9 @@ export function ComparisonCard({ item, onRemove }: Props) {
     const isAddingDisabled = isAdding || isCartLoading
 
     const handleAddToCart = async () => {
+        // Цену не отправляем — сервер сам считает её по прайсу
         const dto: AddToCart = {
             productId: product.id,
-            price: Number(product.defaultPrice || 0),
             taste: getTastes(product)[0]?.name || 'Стандартный',
             size: getSizes(product)[0]?.name || 'Стандартный',
         }

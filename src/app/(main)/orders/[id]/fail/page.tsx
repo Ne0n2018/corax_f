@@ -5,6 +5,7 @@ import Link from 'next/link'
 import {Container} from '@/components/ui/container'
 import {useOrderStore} from '@/store/order.store'
 import {OrderResponse} from '@/types/order'
+import {OrderAmountBreakdown} from '@/components/shared/checkout/order-amount-breakdown'
 import {AlertCircle, ArrowLeft, Loader2, RefreshCw, XCircle} from 'lucide-react'
 import {toast} from 'sonner'
 
@@ -78,13 +79,10 @@ export default function OrderFailPage({
                     </p>
                 </div>
 
-                {/* Сумма заказа */}
+                {/* Сумма заказа — из полей ответа сервера */}
                 {order && (
-                    <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-gray-500 font-medium">Сумма к оплате</span>
-                        <span className="text-base sm:text-lg font-black text-gray-900">
-                            {Number(order.totalAmount).toFixed(2)} р.
-                        </span>
+                    <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                        <OrderAmountBreakdown order={order} totalLabel="Сумма к оплате" />
                     </div>
                 )}
 

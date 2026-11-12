@@ -7,6 +7,7 @@ import { Container } from '@/components/ui/container'
 import { useOrderStore } from '@/store/order.store'
 import { useCartStore } from '@/store/cart.store'
 import { OrderResponse, DeliveryType } from '@/types/order'
+import { OrderAmountBreakdown } from '@/components/shared/checkout/order-amount-breakdown'
 import { CheckCircle2, Package, MapPin, CreditCard, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react'
 
 export default function OrderSuccessPage({
@@ -44,6 +45,8 @@ export default function OrderSuccessPage({
                 return 'Самовывоз из магазина'
             case DeliveryType.EUROMAIL:
                 return 'Доставка Европочтой'
+            case DeliveryType.BELMAIL:
+                return 'Доставка Белпочтой'
             case DeliveryType.DELIVERY:
             default:
                 return 'Курьерская доставка'
@@ -85,13 +88,11 @@ export default function OrderSuccessPage({
 
                 {/* Детали заказа */}
                 {order && (
-                    <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 text-left border border-gray-100 space-y-4">
-                        <div className="flex items-center justify-between pb-3 border-b border-gray-200/60">
-                            <span className="text-xs sm:text-sm text-gray-500 font-medium">Сумма оплаты</span>
-                            <span className="text-base sm:text-lg font-black text-gray-900">
-                                {Number(order.totalAmount).toFixed(2)} р.
-                            </span>
-                        </div>
+                        <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 text-left border border-gray-100 space-y-4">
+                            <div className="pb-3 border-b border-gray-200/60">
+                                <OrderAmountBreakdown order={order} totalLabel="Сумма оплаты" />
+                            </div>
+
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
                             <div className="flex items-start gap-2.5">
